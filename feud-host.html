@@ -25,12 +25,14 @@ let G,P=[],ans=[],cheat=false,nextMode=false,CODES={};
 (async()=>{loadTheme();const{data:ok}=await sb.rpc('is_host');if(!ok){g('gate').classList.remove('hide');return}
  const{data:r}=await sb.from('feud_games').select('*').eq('active',true).order('created_at',{ascending:false}).limit(1);
  if(r&&r[0])open(r[0]);else g('setup').classList.remove('hide')})();
+async function aiWhy(error,data){let e=data&&data.error;if(!e&&error&&error.context&&error.context.json){try{e=(await error.context.json()).error}catch(_){}}
+ return e==='host_only'?'Please log in as host first.':e==='no_key'?'The AI key is missing. Save GEMINI_API_KEY in Supabase.':e==='ai_failed'?'The AI service was busy. Please try again in a moment.':'Something went wrong talking to the AI. Please try again.'}
 const AIM=[];
 function say(r,t){const d=document.createElement('div');d.textContent=t;d.style.cssText='padding:10px 14px;border-radius:16px;max-width:88%;'+(r==='user'?'align-self:flex-end;background:rgba(255,200,87,.2)':'background:rgba(255,255,255,.08)');g('aic').appendChild(d);g('aic').scrollTop=1e9}
 say('ai',"Hi! Tell me about your group and what the round should be about. I'll ask a couple of quick questions, then build it for you to review.");
 async function aiSend(){const t=g('aii').value.trim();if(!t)return;say('user',t);g('aii').value='';AIM.push({role:'user',text:t});g('aig').disabled=true;
  const{data,error}=await sb.functions.invoke('generate-questions',{body:{mode:'feud_chat',messages:AIM}});g('aig').disabled=false;
- if(error||!data||!data.reply){say('ai',data&&data.error==='host_only'?'Please log in as host first.':'The AI is not available right now. Check that GEMINI_API_KEY is saved in Supabase.');AIM.pop();return}
+ if(error||!data||!data.reply){say('ai',await aiWhy(error,data));AIM.pop();return}
  AIM.push({role:'model',text:data.reply});say('ai',data.reply);
  if(data.ready&&data.question&&Array.isArray(data.answers)){g('q').value=String(data.question);g('ans').value=data.answers.map(a=>String(a.text).replace(/,/g,' ')+', '+(parseInt(a.points)||0)).join('\n');say('ai','I filled in the survey below. Edit anything you like, then click Create game.')}}
 g('aig').onclick=aiSend;g('aii').onkeydown=e=>{if(e.key==='Enter')aiSend()};

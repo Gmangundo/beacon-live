@@ -43,6 +43,20 @@ function fromAI(q){const o=(q.options||[]).concat(['','','','']).slice(0,4);
   time:Math.min(120,Math.max(5,+q.time_limit_seconds||DEF.time)),pts:Math.min(2000,Math.max(0,+q.points||DEF.pts)),
   scaleLo:q.kind==='rating'?(q.options&&q.options[0])||'Strongly disagree':'Strongly disagree',
   scaleHi:q.kind==='rating'?(q.options&&q.options[1])||'Strongly agree':'Strongly agree'}}
+async function aiWhy(error,data){let e=data&&data.error;if(!e&&error&&error.context&&error.context.json){try{e=(await error.context.json()).error}catch(_){}}
+ return e==='host_only'?'Please log in as host first.':e==='no_key'?'The AI key is missing. Save GEMINI_API_KEY in Supabase.':e==='ai_failed'?'The AI service was busy. Please try again in a moment.':'Something went wrong talking to the AI. Please try again.'}
+const QM=[];let qm;
+function qsay(r,t){const d=document.createElement('div');d.textContent=t;d.style.cssText='padding:10px 14px;border-radius:16px;max-width:88%;'+(r==='user'?'align-self:flex-end;background:rgba(255,200,87,.2)':'background:rgba(255,255,255,.08)');g('qaic').appendChild(d);g('qaic').scrollTop=1e9}
+async function qSend(){const t=g('qaii').value.trim();if(!t)return;qsay('user',t);g('qaii').value='';QM.push({role:'user',text:t});g('qaig').disabled=true;
+ const{data,error}=await sb.functions.invoke('generate-questions',{body:{mode:'quiz_chat',messages:QM}});g('qaig').disabled=false;
+ if(error||!data||!data.reply){qsay('ai',await aiWhy(error,data));QM.pop();return}
+ QM.push({role:'model',text:data.reply});qsay('ai',data.reply);
+ if(data.ready&&Array.isArray(data.questions)&&data.questions.length){const wb=Q.length===1&&!Q[0].prompt.trim(),ad=data.questions.map(fromAI);Q=wb?ad:Q.concat(ad);active=Q.length-ad.length;render();qsay('ai','Added '+ad.length+' questions. Close this chat to review and edit them before saving.')}}
+function openQChat(){if(!qm){qm=document.createElement('div');qm.style.cssText='position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(0,0,0,.6)';
+ qm.innerHTML='<div class="card" role="dialog" aria-label="Chat with the AI" style="width:100%;max-width:520px;padding:18px"><div style="display:flex;justify-content:space-between;align-items:center"><b>Chat with the AI</b><button class="alt" id="qx" style="width:auto;padding:8px 14px">Close</button></div><div id="qaic" aria-live="polite" style="height:280px;overflow:auto;margin:12px 0;display:flex;flex-direction:column;gap:8px"></div><div style="display:flex;gap:8px"><input id="qaii" placeholder="Tell the AI about your group and topic" aria-label="Message to the AI" style="flex:1" autocomplete="off"><button class="primary" id="qaig" style="width:auto;padding:12px 22px">Send</button></div></div>';
+ document.body.appendChild(qm);g('qx').onclick=()=>{qm.style.display='none'};g('qaig').onclick=qSend;g('qaii').onkeydown=e=>{if(e.key==='Enter')qSend()};
+ qsay('ai',"Hi! Tell me about your group and what the quiz should cover. I'll ask a couple of quick questions, then write the questions for you to review.")}
+ qm.style.display='flex';g('qaii').focus()}
 async function genWithAI(){const m=g('aiMsg'),topic=g('aiTopic').value.trim(),passage=g('aiPassage').value.trim(),count=+g('aiCount').value;
  if(!topic&&!passage){m.textContent='Add a topic or a passage first.';return}
  m.textContent='Writing questions...';g('aiGo').disabled=true;
@@ -112,7 +126,7 @@ document.addEventListener('click',async e=>{const d=e.target.dataset;
  if(d.delst&&confirm('Delete this study and its questions?')){await sb.from('studies').delete().eq('id',d.delst);showList()}
  if(d.go!==undefined){active=+d.go;render()}
  if(d.add){Q.push(blank());active=Q.length-1;render()}
- if(d.ai){g('aiPanel').classList.toggle('hide')}
+ if(d.ai){openQChat()}
  if(d.aigo){await genWithAI()}
  if(d.up){if(active>0){[Q[active-1],Q[active]]=[Q[active],Q[active-1]];active--;render()}}
  if(d.dn){if(active<Q.length-1){[Q[active+1],Q[active]]=[Q[active],Q[active+1]];active++;render()}}
