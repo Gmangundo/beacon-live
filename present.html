@@ -75,7 +75,7 @@ g('create').onclick=async()=>{const{data,error}=await sb.rpc('create_session',{p
 async function enter(id,c){S=id;code=c;localStorage.lampHost=id;g('setup').classList.add('hide');g('live').classList.remove('hide');
  const{data:s}=await sb.from('sessions').select('study_id').eq('id',id).single();
  const{count}=await sb.from('questions').select('id',{count:'exact',head:true}).eq('study_id',s.study_id);total=count||0;
- const el=document.createElement('div');new QRCode(el,{text:location.origin+location.pathname.replace(/[^/]*$/,'')+'?c='+code,width:220,height:220,colorDark:'#15161A',colorLight:'#fff'});qrEl=el;
+ const el=document.createElement('div');new QRCode(el,{text:location.origin+location.pathname.replace(/[^/]*$/,'')+'play.html?c='+code,width:220,height:220,colorDark:'#15161A',colorLight:'#fff'});qrEl=el;
  sb.channel('h'+S).on('postgres_changes',{event:'UPDATE',schema:'public',table:'sessions',filter:'id=eq.'+S},tick).subscribe();
  setInterval(tick,2000);tick()}
 async function tick(){try{const{data:s}=await sb.from('sessions').select('*').eq('id',S).single();ses=s;

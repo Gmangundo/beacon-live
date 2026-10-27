@@ -1,87 +1,57 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="description" content="Beacon: live Bible-study quizzes and Family Feud for your group."><meta name="theme-color" content="#0A0E1C"><link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%23E8A93D'/%3E%3C/svg%3E">
-<meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#070A14">
-<title>Beacon</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="lamp.css"><link rel="stylesheet" href="beacon-theme.css"></head>
-<body><main>
-<div id="off" class="hide" role="status">No connection - trying again...</div>
-<section id="join">
-  <div class="brand"><svg class="logo" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-<path d="M24 4 L24 12" stroke="url(#bg)" stroke-width="3" stroke-linecap="round"/>
-<path d="M12 10 L17 15M36 10 L31 15" stroke="url(#bg)" stroke-width="3" stroke-linecap="round"/>
-<circle cx="24" cy="24" r="9" fill="url(#bg)"/>
-<path d="M9 44 L16 20 H32 L39 44 Z" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/>
-<defs><linearGradient id="bg" x1="0" y1="0" x2="48" y2="48"><stop stop-color="#E8A93D"/><stop offset="1" stop-color="#B8791A"/></linearGradient></defs></svg><span>Beacon</span></div>
-  <input id="code" inputmode="numeric" maxlength="6" placeholder="Join code" aria-label="Join code" autocomplete="off">
-  <input id="nick" maxlength="20" placeholder="Your name" aria-label="Your name" autocomplete="off">
-  <p class="small">Pick your emoji</p><div class="em" id="em"></div>
-  <button class="primary" id="go">Join</button>
-  <p id="msg" class="err" role="alert"></p>
-  <p class="small">Only your name is used. Session results are deleted after 30 days.</p>
-  <div style="display:grid;gap:12px;margin-top:22px"><a class="card" href="feud.html" style="display:block;padding:18px 20px;text-decoration:none;color:inherit"><b style="font-size:1.1rem">Family Feud</b><div class="small">Join with your team code</div></a><a class="card" href="present.html" style="display:block;padding:18px 20px;text-decoration:none;color:inherit"><b style="font-size:1.1rem">Host a game</b><div class="small">Log in to run a quiz or Family Feud</div></a></div><p class="small" style="text-align:center;margin-top:14px"><a href="studies.html">Manage studies</a></p>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Beacon</title>
+<meta name="description" content="Live Bible-study quizzes and Family Feud for your whole group."><meta name="theme-color" content="#070A14">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%23E8A93D'/%3E%3C/svg%3E">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet"><link rel="stylesheet" href="lamp.css"><link rel="stylesheet" href="beacon-theme.css">
+<style>
+#hero{position:fixed;inset:0;width:100%;height:100%;z-index:-1;pointer-events:none}
+html,body{overflow-x:hidden}.wrap{box-sizing:border-box;width:100%;max-width:1040px;margin:0 auto;padding:28px 20px 60px}
+.top{display:flex;align-items:center;gap:12px;font-weight:900;letter-spacing:.16em;font-size:.95rem}
+.dot{width:14px;height:14px;border-radius:50%;background:radial-gradient(circle,#fff,#FFC857 40%,#FF9F1C);box-shadow:0 0 24px 6px rgba(255,159,28,.7)}
+.hero{text-align:center;padding:64px 0 24px}
+.hero h1{font-size:clamp(2.5rem,9vw,5.2rem);line-height:1;margin:0 0 18px;font-weight:900;letter-spacing:-.045em}
+.hero p{color:var(--sub);font-size:1.15rem;max-width:540px;margin:0 auto 30px}
+.join{display:flex;gap:10px;max-width:460px;margin:0 auto;padding:10px;border-radius:28px;align-items:center}
+.join button{width:auto;flex:none;padding:16px 34px}.join input::placeholder{color:var(--sub);letter-spacing:.14em}.join input{flex:1 1 auto;width:auto;min-width:0;text-align:center;font-size:1.5rem;font-weight:800;letter-spacing:.22em;border:0!important;background:transparent!important;padding:10px!important;box-shadow:none!important}
+.modes{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:20px;margin-top:48px}
+.mode{display:block;min-height:210px;padding:26px;text-decoration:none;color:inherit;position:relative;overflow:hidden}
+.mode::after{content:"";position:absolute;right:-50px;bottom:-70px;width:210px;height:210px;border-radius:50%;background:var(--g);filter:blur(38px);opacity:.5;transition:opacity .4s,transform .6s;z-index:-1}
+.mode:hover::after{opacity:.9;transform:scale(1.25)}
+.mode b{display:block;font-size:1.7rem;letter-spacing:-.03em;margin-bottom:8px}.mode span.d{color:var(--sub)}
+.tag{display:inline-block;margin-bottom:44px;padding:6px 12px;border-radius:999px;font-size:.75rem;font-weight:800;letter-spacing:.14em;background:rgba(255,255,255,.12)}
+.m1{--g:#FF9F1C}.m2{--g:linear-gradient(90deg,#FF6B6B,#5AA9FF)}.m3{--g:#7C5CFF}
+.foot{text-align:center;color:var(--sub);font-size:.85rem;margin-top:40px}.foot a{color:var(--accent2)}
+</style></head>
+<body><canvas id="hero" aria-hidden="true"></canvas>
+<div class="wrap">
+<div class="top"><span class="dot"></span>BEACON</div>
+<section class="hero"><h1>Bible study,<br>made a game show.</h1>
+<p>Live quizzes and Family Feud for your whole group. Enter a code, pick your emoji and play.</p>
+<form class="card join" id="jf"><input id="code" inputmode="numeric" maxlength="6" placeholder="GAME CODE" aria-label="Game code" autocomplete="off"><button class="primary" type="submit">Join</button></form></section>
+<section class="modes">
+<a class="card mode m1" href="play.html"><span class="tag">QUIZ</span><b>Join a quiz</b><span class="d">Answer fast and climb the leaderboard.</span></a>
+<a class="card mode m2" href="feud.html"><span class="tag">FAMILY FEUD</span><b>Red vs Blue</b><span class="d">Join your team, buzz in and guess the top answers.</span></a>
+<a class="card mode m3" href="present.html"><span class="tag">HOST</span><b>Run a game</b><span class="d">Log in to host a quiz or Family Feud.</span></a>
 </section>
-<section id="game" class="hide" aria-live="polite"><div id="box"></div><p id="note" class="err"></p></section>
-</main>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="config.js"></script><script src="lamp.js"></script>
-<script>const EM=["🦁","🐑","🕊️","🔥","⭐","🙏","👑","🌟","🎺","🌿","🕯️","🛡️"];let em=localStorage.lampEm||EM[0];
-g("em").innerHTML=EM.map(e=>`<button type="button" data-e="${e}" class="${e===em?"on":""}" aria-label="Emoji ${e}">${e}</button>`).join("");
-g("em").onclick=e=>{const b=e.target.closest("button");if(!b)return;em=b.dataset.e;localStorage.lampEm=em;g("em").querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b))};</script>
+<p class="foot">Only your name is used. Session results are deleted after 30 days. <a href="studies.html">Manage studies</a></p>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
-const ERR={invalid_code:"We couldn't find that code. Check the big screen and try again.",nickname_taken:"That name is taken. Try another one.",bad_nickname:"Please use 2 to 20 letters or numbers.",nickname_not_allowed:"Please pick a different name.",too_many_attempts:"Too many tries. Wait a few minutes and try again.",removed:"You were removed from this session.",session_full:"This session is full.",answers_closed:"Answers are closed for this question.",too_late:"Time was up, so that one didn't count.",bad_text:"Please write 1-40 characters.",text_not_allowed:"Please choose different words."};
-const TF=['True','False'];
-let S,P,me='',ses,stt,drawn='';
-g('code').value=new URLSearchParams(location.search).get('c')||'';
-(async()=>{try{await anon()}catch(e){}loadTheme()})();
-async function anon(){const{data:{session}}=await sb.auth.getSession();if(!session){const{error}=await sb.auth.signInAnonymously();if(error)throw error}}
-async function tryJoin(code,nick){try{await anon();const{data,error}=await sb.rpc('join_session',{p_code:code,p_nickname:nick});if(error||!data)return'net';if(!data.ok)return data.error;
- localStorage.lamp=JSON.stringify({code});S=data.session_id;sb.rpc("set_emoji",{p_participant:data.participant_id,p_emoji:em});P=data.participant_id;me=data.nickname;begin();return''}catch(e){return'net'}}
-g('go').onclick=async()=>{g('msg').textContent='';g('go').disabled=true;const e=await tryJoin(g('code').value.trim(),g('nick').value);g('go').disabled=false;if(e)g('msg').textContent=ERR[e]||'Connection problem. Check your data and try again.'};
-(async()=>{const s=localStorage.lamp&&JSON.parse(localStorage.lamp);if(s){const e=await tryJoin(s.code,'');if(e==='invalid_code'||e==='removed')localStorage.removeItem('lamp')}})();
-function begin(){g('join').classList.add('hide');g('game').classList.remove('hide');syncClock();
- sb.channel('s'+S).on('postgres_changes',{event:'UPDATE',schema:'public',table:'sessions',filter:'id=eq.'+S},refresh).subscribe();
- setInterval(refresh,5000);refresh()}
-async function refresh(){try{const[a,b]=await Promise.all([sb.from('sessions').select('status,current_index,current_question,question_ends_at').eq('id',S).single(),sb.rpc('my_state',{p_session_id:S})]);
- if(a.error||!b.data)throw 0;g('off').classList.add('hide');ses=a.data;stt=b.data;draw()}catch(e){g('off').classList.remove('hide')}}
-function optsFor(q){return q.kind==='true_false'?TF:q.options}
-function ansHtml(q,ci,tx){if(q.kind==='word_cloud')return`<div class="card"><p class="small">Your answer</p><b>${esc(tx)}</b></div>`;
- const o=optsFor(q);return`<p class="opt ${CL[ci]}" style="padding:14px 18px;border-radius:16px"><b>${SH[ci]}</b>${esc(o[ci])}</p>`}
-async function draw(){const k=[ses.status,ses.current_index,stt.choice_index,stt.text_answer,stt.removed].join();if(k===drawn)return;drawn=k;g('note').textContent='';
- const q=ses.current_question,box=g('box');
- if(stt.removed){box.innerHTML='<h2>You were removed from this session.</h2>';return}
- if(ses.status==='lobby')box.innerHTML=`<h2>You're in, ${esc(me)}!</h2><p>Waiting for the host to start...</p>`;
- else if(ses.status==='question'){
-  const answered=stt.choice_index!=null||stt.text_answer!=null;
-  if(answered)fadeSwap(box,`<div class="lockedin">&#10003;</div><h2>Answer locked in</h2>${ansHtml(q,stt.choice_index,stt.text_answer)}<p>Waiting for everyone...</p>`);
-  else{
-   let inner;
-   if(q.kind==='rating')inner=`<div class="scale">${[1,2,3,4,5].map((n,i)=>`<button data-r="${i}">${n}</button>`).join('')}</div><div class="row small" style="justify-content:space-between"><span>${esc(q.options[0])}</span><span>${esc(q.options[1])}</span></div>`;
-   else if(q.kind==='word_cloud')inner=`<input id="wc" maxlength="40" placeholder="Type your answer" aria-label="Your answer" autocomplete="off"><button class="primary" id="wcgo">Send</button>`;
-   else{const o=optsFor(q);inner=`<div class="opts">${o.map((op,i)=>`<button class="opt ${CL[i]}" data-i="${i}" aria-label="Option ${i+1}: ${esc(op)}"><b>${SH[i]}</b>${esc(op)}</button>`).join('')}</div>`}
-   box.style.transition='none';box.style.opacity=1;box.style.transform='none';box.innerHTML=`<p class="small">Question ${q.index+1} of ${q.total}</p><h2>${esc(q.prompt)}</h2><div class="ring" id="ringwrap"><span id="tm"></span></div>${inner}`}}
- else if(ses.status==='locked')fadeSwap(box,'<h2>Answers are in!</h2><p>Waiting for the reveal...</p>');
- else if(ses.status==='revealed'){
-  if(q.kind==='poll'||q.kind==='rating')fadeSwap(box,'<h2>Thanks for sharing!</h2>');
-  else if(q.kind==='word_cloud')fadeSwap(box,'<h2>Thanks for your answer!</h2>');
-  else{const ok=stt.is_correct,ca=stt.correct_index,o=optsFor(q);if(ok)confettiBurst(50);
-   fadeSwap(box,(ok?`<h2>Well done! +${stt.points}</h2>`:stt.choice_index==null?'<h2>Time ran out. No worries!</h2>':'<h2>Good try!</h2>')+(ok?'':`<p>The answer was ${SH[ca]} ${esc(o[ca])}.</p>`)+`<p>Score ${stt.score} - rank ${stt.rank} of ${stt.total}</p>`)}}
- else{const{data}=await sb.rpc('get_leaderboard',{p_session_id:S,p_limit:5});const ended=ses.status==='ended';if(ended){localStorage.removeItem('lamp');confettiBurst(90)}
-  const top=data?.top||[],mx=Math.max(1,...top.map(r=>r.score));
-  const{data:ej}=await sb.rpc('get_emojis',{p_session:S});const E=Object.fromEntries((ej||[]).map(x=>[x.nickname,x.emoji]));
-  fadeSwap(box,`<h2>${ended?'Thanks for joining!':'Leaderboard'}</h2><ul class="lb">${top.map(r=>`<li class="${r.is_me?'me':''}"><span class="rank">${r.rank}</span><div class="bar"><i class="fillbar ${CL[r.rank%4]}" data-w="${Math.max(14,r.score/mx*100)}"></i><span class="lbl">${E[r.nickname]?esc(E[r.nickname])+' ':''}${esc(r.nickname)}</span><span class="pts" style="color:${r.score>0?'#fff':'inherit'}">${r.score}</span></div></li>`).join('')}</ul>`+(data?.me?`<p>You: rank ${data.me.rank} of ${data.total} with ${data.me.score} points</p>`:''),
-   ()=>requestAnimationFrame(()=>requestAnimationFrame(()=>box.querySelectorAll('.fillbar').forEach(el=>el.style.width=el.dataset.w+'%'))));}}
-g('box').onclick=async e=>{
- const b=e.target.closest('.opt[data-i]');if(b){const i=+b.dataset.i;g('box').querySelectorAll('.opt,.scale button,#wcgo').forEach(x=>x.disabled=true);
-  const{data}=await sb.rpc('submit_answer',{p_session_id:S,p_choice:i});
-  if(data&&(data.ok||data.error==='already_answered')){stt.choice_index=i;draw()}else{g('note').textContent=ERR[data&&data.error]||'Could not send. Try again.';drawn='';refresh()}return}
- const r=e.target.closest('.scale button[data-r]');if(r){const i=+r.dataset.r;r.classList.add('picked');g('box').querySelectorAll('.opt,.scale button,#wcgo').forEach(x=>x.disabled=true);
-  const{data}=await sb.rpc('submit_answer',{p_session_id:S,p_choice:i});
-  if(data&&(data.ok||data.error==='already_answered')){stt.choice_index=i;draw()}else{g('note').textContent=ERR[data&&data.error]||'Could not send. Try again.';drawn='';refresh()}return}
- if(e.target.id==='wcgo'){const v=g('wc').value.trim();if(!v)return;g('box').querySelectorAll('.opt,.scale button,#wcgo').forEach(x=>x.disabled=true);
-  const{data}=await sb.rpc('submit_answer',{p_session_id:S,p_text:v});
-  if(data&&(data.ok||data.error==='already_answered')){stt.text_answer=v;draw()}else{g('note').textContent=ERR[data&&data.error]||'Could not send. Try again.';drawn='';refresh()}}};
-setInterval(()=>{const t=g('tm'),w=g('ringwrap');if(!t||!ses||ses.status!=='question')return;const q=ses.current_question,left=Math.max(0,(new Date(ses.question_ends_at)-now())/1000),total=q.time_limit;
- t.textContent=Math.ceil(left)+'s';if(w){w.style.setProperty('--pct',Math.max(0,left/total*100));w.classList.toggle('low',left<=5&&left>0)}if(!left&&!t.dataset.z){t.dataset.z=1;refresh()}},150);
-addEventListener('online',refresh);document.addEventListener('visibilitychange',()=>{if(!document.hidden&&S)refresh()});
+document.getElementById('jf').onsubmit=e=>{e.preventDefault();const c=document.getElementById('code').value.trim();location.href='play.html'+(c?'?c='+encodeURIComponent(c):'')};
+(()=>{const cv=document.getElementById('hero');if(!window.THREE)return;let R;try{R=new THREE.WebGLRenderer({canvas:cv,alpha:true,antialias:true})}catch(e){return}
+const S=new THREE.Scene(),C=new THREE.PerspectiveCamera(50,1,.1,100),G=new THREE.Group();C.position.z=9;S.add(G);
+S.add(new THREE.AmbientLight(0xffffff,.5));const L=new THREE.PointLight(0xffb347,2.2,40);L.position.set(2,3,6);S.add(L);
+const orb=new THREE.Mesh(new THREE.IcosahedronGeometry(1.5,2),new THREE.MeshStandardMaterial({color:0xff9f1c,emissive:0xff7a00,emissiveIntensity:.7,flatShading:true,metalness:.3,roughness:.4}));G.add(orb);
+const ring=new THREE.Mesh(new THREE.TorusGeometry(2.6,.04,12,120),new THREE.MeshBasicMaterial({color:0x7c5cff}));ring.rotation.x=1.2;G.add(ring);
+const n=260,pos=new Float32Array(n*3);for(let i=0;i<n*3;i++)pos[i]=(Math.random()-.5)*28;
+const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(pos,3));const pts=new THREE.Points(g,new THREE.PointsMaterial({size:.06,color:0xffffff,transparent:true,opacity:.7}));S.add(pts);
+const em=['🦁','🕊️','🔥','⭐','🙏','👑','🎺','🌿'].map((e,i)=>{const c=document.createElement('canvas');c.width=c.height=128;const x=c.getContext('2d');x.font='96px serif';x.textAlign='center';x.textBaseline='middle';x.fillText(e,64,70);const s=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(c),transparent:true}));s.scale.set(.9,.9,.9);s.userData.a=i/8*Math.PI*2;G.add(s);return s});
+let mx=0,my=0;addEventListener('pointermove',e=>{mx=e.clientX/innerWidth-.5;my=e.clientY/innerHeight-.5});
+const still=matchMedia('(prefers-reduced-motion:reduce)').matches;
+(function loop(t){requestAnimationFrame(loop);const w=innerWidth,h=innerHeight,wide=w>800;
+ if(cv.width!==Math.floor(w*devicePixelRatio)){R.setPixelRatio(devicePixelRatio);R.setSize(w,h,false);C.aspect=w/h;C.updateProjectionMatrix()}
+ G.position.set(wide?3.6:0,wide?.3:3,-1);G.scale.setScalar(wide?1:.6);
+ const s=still?0:t/1000;orb.rotation.y=s*.4;orb.rotation.x=s*.2;ring.rotation.z=s*.3;pts.rotation.y=s*.02;
+ em.forEach(e=>{const a=e.userData.a+s*.35;e.position.set(Math.cos(a)*3.6,Math.sin(a*1.3)*1.4,Math.sin(a)*3.6)});
+ C.position.x+=(mx*2-C.position.x)*.05;C.position.y+=(-my*1.5-C.position.y)*.05;C.lookAt(0,0,0);R.render(S,C)})(0)})();
 </script><script src="fx.js" defer></script></body></html>
