@@ -11,6 +11,8 @@
 <body><main class="wide">
 <section id="gate" class="hide" style="max-width:420px;margin:auto"><h2>Host login needed</h2><p><a href="present.html">Log in on the host page</a>, then come back here.</p></section>
 <section id="setup" class="hide" style="max-width:640px;margin:auto"><h1>Family Feud: build the survey</h1>
+<div class="card" style="padding:18px;margin:14px 0"><b>Build it with AI</b><div id="aic" aria-live="polite" style="max-height:230px;overflow:auto;margin:10px 0;display:flex;flex-direction:column;gap:8px"></div>
+<div style="display:flex;gap:8px"><input id="aii" placeholder="Tell the AI about your group and topic" aria-label="Message to the AI" style="flex:1" autocomplete="off"><button class="primary" id="aig" style="width:auto;padding:12px 22px">Send</button></div></div>
 <input id="q" placeholder="Question" aria-label="Question">
 <textarea id="ans" rows="6" placeholder="One answer per line, with points:&#10;Genesis, 38&#10;Psalms, 24&#10;John, 18" aria-label="Answers and points"></textarea>
 <button class="primary" id="mk">Create game</button><p id="msg" class="err" role="alert"></p></section>
@@ -23,6 +25,15 @@ let G,P=[],ans=[],cheat=false,nextMode=false,CODES={};
 (async()=>{loadTheme();const{data:ok}=await sb.rpc('is_host');if(!ok){g('gate').classList.remove('hide');return}
  const{data:r}=await sb.from('feud_games').select('*').eq('active',true).order('created_at',{ascending:false}).limit(1);
  if(r&&r[0])open(r[0]);else g('setup').classList.remove('hide')})();
+const AIM=[];
+function say(r,t){const d=document.createElement('div');d.textContent=t;d.style.cssText='padding:10px 14px;border-radius:16px;max-width:88%;'+(r==='user'?'align-self:flex-end;background:rgba(255,200,87,.2)':'background:rgba(255,255,255,.08)');g('aic').appendChild(d);g('aic').scrollTop=1e9}
+say('ai',"Hi! Tell me about your group and what the round should be about. I'll ask a couple of quick questions, then build it for you to review.");
+async function aiSend(){const t=g('aii').value.trim();if(!t)return;say('user',t);g('aii').value='';AIM.push({role:'user',text:t});g('aig').disabled=true;
+ const{data,error}=await sb.functions.invoke('generate-questions',{body:{mode:'feud_chat',messages:AIM}});g('aig').disabled=false;
+ if(error||!data||!data.reply){say('ai',data&&data.error==='host_only'?'Please log in as host first.':'The AI is not available right now. Check that GEMINI_API_KEY is saved in Supabase.');AIM.pop();return}
+ AIM.push({role:'model',text:data.reply});say('ai',data.reply);
+ if(data.ready&&data.question&&Array.isArray(data.answers)){g('q').value=String(data.question);g('ans').value=data.answers.map(a=>String(a.text).replace(/,/g,' ')+', '+(parseInt(a.points)||0)).join('\n');say('ai','I filled in the survey below. Edit anything you like, then click Create game.')}}
+g('aig').onclick=aiSend;g('aii').onkeydown=e=>{if(e.key==='Enter')aiSend()};
 g('mk').onclick=async()=>{g('msg').textContent='';const a=g('ans').value.split('\n').map(l=>l.trim()).filter(Boolean).map(l=>{const i=l.lastIndexOf(',');return{text:(i<0?l:l.slice(0,i)).trim(),points:i<0?0:parseInt(l.slice(i+1))||0}});
  if(!g('q').value.trim()||a.length<2){g('msg').textContent='Add a question and at least 2 answers.';return}
  const{data,error}=await sb.rpc(nextMode?'feud_next_round':'feud_create',nextMode?{p_game:G.id,p_question:g('q').value,p_answers:a}:{p_question:g('q').value,p_answers:a});if(error||!data||data.error){g('msg').textContent='Could not save. Did you run all three SQL files?';return}
