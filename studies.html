@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="description" content="Beacon: live Bible-study quizzes and Family Feud for your group."><meta name="theme-color" content="#0A0E1C"><link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%23E8A93D'/%3E%3C/svg%3E">
+<html lang="en"><head><meta charset="utf-8"><meta name="description" content="Beacon: live quizzes and Family Feud for your group."><meta name="theme-color" content="#0A0E1C"><link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%23E8A93D'/%3E%3C/svg%3E">
 <meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#070A14">
 <title>Beacon studies</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -151,4 +151,4 @@ async function dupStudy(id){const{data:s}=await sb.from('studies').select('*').e
  for(const q of qs||[]){const{data:nq}=await sb.from('questions').insert({study_id:n.id,position:q.position,kind:q.kind,prompt:q.prompt,options:q.options,time_limit_seconds:q.time_limit_seconds,points:q.points,image_url:q.image_url}).select('id').single();
   if(km[q.id]!==undefined)await sb.from('question_keys').insert({question_id:nq.id,correct_index:km[q.id]})}
  showList()}
-</script><script src="fx.js" defer></script></body></html>
+</script><script src="fx.js" defer></script><script src="bg3d.js" defer></script><script src="shell.js" defer></script></body></html>

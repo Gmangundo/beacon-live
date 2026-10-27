@@ -1,0 +1,5 @@
+(()=>{const f=location.pathname.split('/').pop();if(document.getElementById('hero')||f===''||f==='index.html'||f==='present.html')return;
+const a='color:var(--sub);text-decoration:none;font-weight:700;font-size:.9rem',h=document.createElement('header');
+h.style.cssText='position:fixed;top:0;left:0;right:0;z-index:20;display:flex;align-items:center;gap:16px;padding:12px 18px;-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);background:rgba(7,10,20,.6);border-bottom:1px solid rgba(255,255,255,.08)';
+h.innerHTML='<a href="index.html" style="display:flex;align-items:center;gap:10px;color:inherit;text-decoration:none;font-weight:900;letter-spacing:.16em;font-size:.9rem"><span style="width:12px;height:12px;border-radius:50%;background:radial-gradient(circle,#fff,#FFC857 40%,#FF9F1C);box-shadow:0 0 18px 4px rgba(255,159,28,.7)"></span>BEACON</a><span style="flex:1"></span><a style="'+a+'" href="play.html">Quiz</a><a style="'+a+'" href="feud.html">Feud</a><a style="'+a+'" href="present.html">Host</a>';
+document.body.prepend(h);document.body.style.paddingTop='58px'})();

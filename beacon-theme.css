@@ -18,3 +18,8 @@ input:not([type=checkbox]):not([type=radio]):focus,textarea:focus{border-color:v
 .lb li{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:20px}
 .lb li:first-child{background:linear-gradient(135deg,rgba(255,200,87,.28),rgba(255,159,28,.1));border-color:var(--accent2);box-shadow:0 0 30px rgba(255,159,28,.25)}
 @media(prefers-reduced-motion:reduce){body::before{animation:none}}
+
+/* answer tiles take their option colour; buzzer pulses */
+.opt.a,.opt.b,.opt.c,.opt.d{background:linear-gradient(160deg,color-mix(in srgb,var(--tint) 40%,transparent),color-mix(in srgb,var(--tint) 10%,transparent));border-color:var(--tint)}
+.buzz{animation:bz 1.2s ease-in-out infinite}@keyframes bz{50%{transform:scale(1.06)}}
+@media(prefers-reduced-motion:reduce){.buzz{animation:none}}
