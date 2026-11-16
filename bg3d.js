@@ -1,4 +1,4 @@
-(()=>{if(document.getElementById('hero'))return;
+(()=>{if(document.getElementById('hero')||window.BEACON_SPLINE_BG)return;
 const cv=document.createElement('canvas');cv.setAttribute('aria-hidden','true');cv.style.cssText='position:fixed;inset:0;width:100%;height:100%;z-index:-1;pointer-events:none;opacity:.75';document.body.prepend(cv);
 const go=()=>{let R;try{R=new THREE.WebGLRenderer({canvas:cv,alpha:true})}catch(e){return}
 const S=new THREE.Scene(),C=new THREE.PerspectiveCamera(50,1,.1,100);C.position.z=9;

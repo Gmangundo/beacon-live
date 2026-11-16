@@ -57,4 +57,4 @@ g('save').onclick=async()=>{const m=g('m');m.textContent='Saving...';
  const{error}=await sb.from('host_settings').update({theme:picked,default_time_seconds:Math.min(120,Math.max(5,+g('dt').value||20)),default_points:Math.min(2000,Math.max(0,+g('dp').value||1000))}).eq('id','00000000-0000-0000-0000-000000000001');
  if(error)return m.textContent='Save failed: '+error.message;
  localStorage.beaconTheme=picked;m.textContent='Saved.'};
-</script><script src="fx.js" defer></script><script src="bg3d.js" defer></script><script src="shell.js" defer></script></body></html>
+</script><script src="fx.js" defer></script><script src="spline.js"></script><script src="bg3d.js" defer></script><script src="shell.js" defer></script></body></html>

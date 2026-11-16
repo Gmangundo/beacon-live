@@ -36,4 +36,4 @@ document.addEventListener('click',async e=>{const id=e.target.id;if(!id)return;
  else if(id==='ex'){const{error}=await sb.auth.signInWithOtp({email:g('em').value.trim(),options:{emailRedirectTo:location.href}});g('am').textContent=error?'Could not send the link. Check the email address.':'Check your email for a sign-in link.'}
  else if(id==='go'){const{error}=await sb.auth.linkIdentity({provider:'google',options:{redirectTo:location.href}});if(error)g('am').textContent='Google sign-in is not switched on yet. Use email for now.'}
  else if(id==='so'){await sb.auth.signOut();location.reload()}});
-</script><script src="bg3d.js" defer></script><script src="shell.js" defer></script><script src="fx.js" defer></script></body></html>
+</script><script src="spline.js"></script><script src="bg3d.js" defer></script><script src="shell.js" defer></script><script src="fx.js" defer></script></body></html>

@@ -1,0 +1,60 @@
+/* Beacon Feud: animated avatars + the game-show board. Shared by feud.html (phones) and feud-host.html (big screen). */
+.av{--s:48px;--bg:#243066;display:inline-grid;place-items:center;width:var(--s);height:var(--s);position:relative;font-size:calc(var(--s)*.62);line-height:1;border-radius:50%;
+ background:radial-gradient(circle at 35% 28%,rgba(255,255,255,.38),rgba(255,255,255,.04) 62%),var(--bg);box-shadow:inset 0 2px 0 rgba(255,255,255,.35),0 10px 18px -8px rgba(0,0,0,.7);vertical-align:middle}
+.av i{font-style:normal;display:block;transform-origin:50% 88%;animation:av-bob var(--d,3.6s) ease-in-out var(--dl,0s) infinite,av-blink 5.5s linear var(--dl,0s) infinite}
+.av.think i{animation:av-think 1.6s ease-in-out infinite}
+.av.hop i{animation:av-hop .7s ease-out infinite}
+.av.cheer i{animation:av-cheer .9s ease-in-out infinite}
+.av.shake i{animation:av-shake .55s ease-in-out 2}
+.av.dim{opacity:.5;filter:saturate(.55)}
+.av.ring{box-shadow:0 0 0 3px var(--accent2,#FFC857),0 0 24px 4px rgba(255,200,87,.6),inset 0 2px 0 rgba(255,255,255,.35)}
+@keyframes av-bob{0%,100%{transform:translateY(0) rotate(-4deg)}50%{transform:translateY(-7%) rotate(4deg)}}
+@keyframes av-blink{0%,91%,100%{scale:1 1}94%{scale:1.07 .84}}
+@keyframes av-think{0%,100%{transform:rotate(-10deg)}50%{transform:rotate(10deg) translateY(-4%)}}
+@keyframes av-hop{0%,100%{transform:translateY(0) scale(1.05,.95)}45%{transform:translateY(-24%) scale(.95,1.08)}}
+@keyframes av-cheer{0%,100%{transform:translateY(0) rotate(0)}25%{transform:translateY(-22%) rotate(-16deg)}75%{transform:translateY(-22%) rotate(16deg)}}
+@keyframes av-shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-14%) rotate(-10deg)}60%{transform:translateX(14%) rotate(10deg)}}
+@media (prefers-reduced-motion:reduce){.av i{animation:none!important}}
+.avpick{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+.avpick button{padding:6px;border-radius:18px;border:1.5px solid var(--line);background:var(--surface);display:grid;place-items:center}
+.avpick button.on{border-color:var(--accent2);background:var(--surface-2);box-shadow:0 0 0 2px rgba(255,200,87,.35)}
+
+/* ---------- the board ---------- */
+.arena{container-type:inline-size;position:relative;width:min(100%,1100px);margin:8px auto 18px;aspect-ratio:1.9/1;font-family:'Oswald','Inter',sans-serif}
+.arena *{box-sizing:border-box}
+.oval{position:absolute;left:11%;right:11%;top:4%;bottom:3%;border-radius:50%;border:1.1cqw solid #FF9F1C;box-shadow:0 0 0 .7cqw #0a0f26,0 3cqw 6cqw -2cqw rgba(0,0,0,.8),inset 0 0 6cqw rgba(0,0,0,.45);
+ background:radial-gradient(circle,#FF9F1C 0 28%,transparent 31%) 0 0/2.6cqw 2.6cqw,radial-gradient(circle at 50% 30%,#2f63ff,#12328f 75%)}
+.wing{position:absolute;top:35%;height:31%;width:22%;border:.9cqw solid #FF9F1C;border-radius:2.4cqw;box-shadow:0 0 0 .6cqw #0a0f26,inset 0 0 4cqw rgba(0,0,0,.4);
+ background:radial-gradient(circle,#FF9F1C 0 28%,transparent 31%) 0 0/2.6cqw 2.6cqw,#1a3fb0}
+.wl{left:1.5%}.wr{right:1.5%}
+.sbox{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);min-width:10.5cqw;padding:.6cqw 1.2cqw;border-radius:1.6cqw;text-align:center;color:#fff;border:.28cqw solid #fff;
+ background:linear-gradient(180deg,#3b6bff,#0d2a86 60%,#0a1f66);box-shadow:0 .8cqw 1.6cqw rgba(0,0,0,.55),inset 0 .25cqw 0 rgba(255,255,255,.45)}
+.sbox small{display:block;font-size:1.25cqw;letter-spacing:.2em;opacity:.9}
+.sbox b{display:block;font-size:4.4cqw;line-height:1;font-weight:700}
+.sbox.r small{color:#ff9b9b}.sbox.b small{color:#9fd0ff}
+.bank{position:absolute;left:50%;top:-.5%;transform:translateX(-50%);z-index:3;min-width:12cqw}
+.bank.sbox{position:absolute;transform:translateX(-50%)}
+.crew{position:absolute;left:0;right:0;bottom:-7.5cqw;display:flex;justify-content:center;flex-wrap:wrap;gap:.6cqw;z-index:4}
+.panel{position:absolute;left:25%;right:25%;top:15%;bottom:25%;padding:1cqw;border-radius:1.6cqw;background:#050818;border:.5cqw solid #FF9F1C;box-shadow:0 0 0 .5cqw #0a0f26,0 1.6cqw 3cqw rgba(0,0,0,.6)}
+.slots{display:grid;height:100%;gap:.9cqw;grid-auto-flow:column}
+.slot{position:relative;display:flex;align-items:stretch;border-radius:.7cqw;overflow:hidden;border:.25cqw solid #cfe0ff;background:linear-gradient(180deg,#0c2a8c,#0a1d62);color:#fff;font-weight:700;text-transform:uppercase;letter-spacing:.02em;min-height:0}
+.slot .idx{margin:auto;display:grid;place-items:center;width:3.6cqw;height:3.6cqw;border-radius:50%;font-size:2.2cqw;background:linear-gradient(180deg,#4a7bff,#1a3fb0);box-shadow:inset 0 .2cqw 0 rgba(255,255,255,.5)}
+.slot .t,.slot .p{display:none}
+.slot.on{perspective:60cqw}
+.slot.on .idx{display:none}
+.slot.on .t{display:block;flex:1;align-self:center;padding:0 1cqw;font-size:2.4cqw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:left}
+.slot.on .p{display:grid;place-items:center;width:5.6cqw;font-size:2.7cqw;background:linear-gradient(180deg,#5b8bff,#2a54c8);border-left:.25cqw solid #cfe0ff}
+.slot.flip{animation:slotflip .7s cubic-bezier(.2,.8,.2,1)}
+.slot.rest{filter:saturate(.35) brightness(.7)}
+@keyframes slotflip{from{transform:rotateX(90deg);filter:brightness(2.4)}to{transform:none}}
+.logo{position:absolute;left:50%;bottom:-1%;transform:translateX(-50%);z-index:3;text-align:center;line-height:.86;padding:.6cqw 2.4cqw 1cqw;border-radius:50%/60%;background:radial-gradient(ellipse at 50% 30%,#3b6bff,#10277a);border:.45cqw solid #ff9f1c;box-shadow:0 0 0 .4cqw #0a0f26,0 1cqw 2cqw rgba(0,0,0,.6)}
+.logo b{display:block;font-weight:700;font-size:3.6cqw;letter-spacing:.04em;background:linear-gradient(180deg,#fff6c9,#ffc857 45%,#ff8a00);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 .25cqw 0 #7a3b00)}
+.xs{position:absolute;left:25%;right:25%;top:76.5%;display:flex;justify-content:center;gap:1.4cqw;z-index:2;pointer-events:none}
+.xs span{font:700 3.4cqw/1 'Oswald',sans-serif;color:#ff4d4d;text-shadow:0 0 1.6cqw rgba(255,77,77,.9);opacity:.18}.xs span.on{opacity:1;animation:xpop .4s ease-out}
+@keyframes xpop{from{transform:scale(2.4);opacity:0}}
+.mult{position:absolute;left:50%;top:9.5%;transform:translateX(-50%);z-index:3;padding:.2cqw 1.4cqw;border-radius:99px;background:#FFC857;color:#241300;font-size:1.6cqw;font-weight:700;letter-spacing:.14em}
+.tick{max-width:1100px;margin:34px auto 0;text-align:center;font-weight:800;font-size:1.25rem}
+.tick .sub{display:block;font-weight:600;font-size:.95rem;color:var(--sub);margin-top:4px}
+.judge{max-width:640px;margin:12px auto;padding:16px 18px;border-radius:20px;border:1.5px solid var(--accent2);background:rgba(255,200,87,.12);text-align:center}
+.judge .cc{justify-content:center}
+@container (max-width:640px){.sbox b{font-size:5.4cqw}.slot.on .t{font-size:3cqw}}
