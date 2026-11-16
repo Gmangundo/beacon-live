@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>My profile - Beacon</title>
+<meta name="description" content="Your Beacon level, streak, badges and leaderboards."><meta name="theme-color" content="#070A14">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="lamp.css"><link rel="stylesheet" href="beacon-theme.css">
+<style>.sec{max-width:640px;margin:0 auto 18px;padding:20px}.sec h2{margin:0 0 12px;font-size:1.2rem}.row2{display:flex;gap:10px;flex-wrap:wrap}.row2>*{flex:1;min-width:140px}
+.xpb{height:12px;border-radius:8px;background:rgba(255,255,255,.12);overflow:hidden}.xpb i{display:block;height:100%;background:linear-gradient(90deg,#FFC857,#FF9F1C)}
+.bg{display:flex;flex-wrap:wrap;gap:8px}.bg span{padding:8px 14px;border-radius:999px;background:rgba(255,200,87,.18);border:1px solid #FFC857;font-weight:700;font-size:.9rem}
+.li{display:flex;gap:12px;padding:10px 14px;border-radius:14px;background:rgba(255,255,255,.06);margin-bottom:8px}.li b{flex:1}.li em{font-style:normal;color:var(--accent2);font-weight:800}</style></head>
+<body><main class="wide"><h1 style="text-align:center">My profile</h1>
+<section class="card sec" id="acct"></section>
+<section class="card sec"><h2 id="lv">Level 1</h2><div class="xpb"><i id="xb" style="width:0"></i></div><p class="small" id="xt"></p>
+<div class="bg" id="bg"></div><p class="small" id="st"></p>
+<div class="row2"><input id="nm" maxlength="20" placeholder="Display name" aria-label="Display name"><button class="primary" id="sv">Save</button></div>
+<label class="small" style="display:block;margin-top:10px"><input type="checkbox" id="gl"> Show me on the global leaderboard (use a nickname, not your real name)</label><p id="pm" class="small" role="status"></p></section>
+<section class="card sec"><h2>My groups</h2><div class="row2"><input id="gc" maxlength="8" placeholder="Group code" aria-label="Group code"><button class="alt" id="jg">Join group</button></div><p id="gm" class="small" role="status"></p><div id="gs"></div></section>
+<section class="card sec hide" id="hb"><h2>Host: create a group</h2><div class="row2"><input id="hn" maxlength="40" placeholder="Group or class name" aria-label="Group name"><select id="hd" aria-label="Season length"><option value="7">Weekly season</option><option value="30" selected>Monthly season</option><option value="70">School term (10 weeks)</option><option value="0">Custom days...</option></select></div><button class="primary" id="cg" style="margin-top:10px">Create group</button><p id="hm" class="small" role="status"></p></section>
+<section class="card sec"><h2>Global leaderboard (last 30 days)</h2><div id="gb"></div></section>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script><script src="config.js"></script><script src="lamp.js"></script><script src="progress.js"></script>
+<script>
+const list=(id,rows,emp)=>{g(id).innerHTML=(rows&&rows.length?rows.map((r,i)=>`<div class="li"><span>${i+1}</span><b>${esc(r.name)}</b><em>${r.xp} XP</em></div>`).join(''):`<p class="small">${emp||'Nothing here yet.'}</p>`)};
+(async()=>{loadTheme();const{data:{session}}=await sb.auth.getSession();if(!session)await sb.auth.signInAnonymously();await load()})();
+async function load(){const{data:{user}}=await sb.auth.getUser();
+ g('acct').innerHTML=user.is_anonymous?`<h2>Keep your progress</h2><p class="small">You are playing as a guest. Sign in so your levels and badges follow you to any device.</p><div class="row2"><input id="em" type="email" placeholder="Your email" aria-label="Email"><button class="primary" id="se">Save with email</button></div><div class="row2" style="margin-top:8px"><button class="alt" id="ex">I already have an account</button><button class="alt" id="go">Continue with Google</button></div><p id="am" class="small" role="status"></p>`:`<h2>Signed in</h2><p class="small">${esc(user.email||'Your account')}</p><button class="alt" id="so">Sign out</button>`;
+ const{data:p}=await sb.rpc('my_profile');if(p){const L=Math.floor(Math.sqrt(p.xp/100))+1,lo=(L-1)**2*100,hi=L*L*100;g('lv').textContent='Level '+L;g('xb').style.width=Math.min(100,(p.xp-lo)/(hi-lo)*100)+'%';g('xt').textContent=p.xp+' XP. '+(hi-p.xp)+' XP to level '+(L+1)+'.';
+  g('bg').innerHTML=(p.badges||[]).map(b=>`<span>${esc(Progress.BL[b]||b)}</span>`).join('')||'<span style="opacity:.6">No badges yet. Finish a game to earn your first.</span>';
+  g('st').textContent='Streak: '+p.streak+' days (best '+p.best_streak+'). Games played: '+p.games+'.';g('nm').value=p.display_name==='Player'?'':p.display_name;g('gl').checked=!!p.show_global}
+ const{data:gl}=await sb.rpc('lb_global');list('gb',gl,'No one has joined the global leaderboard yet.');await groups();
+ const{data:h}=await sb.rpc('is_host');if(h)g('hb').classList.remove('hide')}
+async function groups(){const{data:gs}=await sb.rpc('my_groups');g('gs').innerHTML='';for(const x of(gs||[])){const{data:r}=await sb.rpc('lb_group',{p_code:x.code});const d=document.createElement('div');d.innerHTML=`<h3 style="margin:14px 0 8px">${esc(x.name)} <span class="small">code ${esc(x.code)}${r&&r.days_left!=null?' - '+r.days_left+' days left in season':''}</span></h3><div id="gr${esc(x.code)}"></div>`;g('gs').appendChild(d);list('gr'+x.code,r&&r.rows,'No points yet this season.')}}
+document.addEventListener('click',async e=>{const id=e.target.id;if(!id)return;
+ if(id==='sv'){const{data}=await sb.rpc('set_profile',{p_name:g('nm').value,p_global:g('gl').checked});g('pm').textContent=data&&data.ok?'Saved.':'Please use 2 to 20 clean characters for your name.'}
+ else if(id==='jg'){const{data}=await sb.rpc('join_group',{p_code:g('gc').value});g('gm').textContent=data&&data.ok?'Joined '+data.name+'.':'That group code was not found.';if(data&&data.ok){g('gc').value='';groups()}}
+ else if(id==='cg'){let d=+g('hd').value;if(!d)d=+prompt('How many days should a season last?','14')||0;const{data}=await sb.rpc('create_group',{p_name:g('hn').value,p_days:d});g('hm').textContent=data&&data.ok?'Created. Share this code with your players: '+data.code:'Could not create the group. Check the name and length.';if(data&&data.ok)groups()}
+ else if(id==='se'){const{error}=await sb.auth.updateUser({email:g('em').value.trim()});g('am').textContent=error?'Could not send the link. If that email already has an account, use "I already have an account".':'Check your email and click the link to finish.'}
+ else if(id==='ex'){const{error}=await sb.auth.signInWithOtp({email:g('em').value.trim(),options:{emailRedirectTo:location.href}});g('am').textContent=error?'Could not send the link. Check the email address.':'Check your email for a sign-in link.'}
+ else if(id==='go'){const{error}=await sb.auth.linkIdentity({provider:'google',options:{redirectTo:location.href}});if(error)g('am').textContent='Google sign-in is not switched on yet. Use email for now.'}
+ else if(id==='so'){await sb.auth.signOut();location.reload()}});
+</script><script src="bg3d.js" defer></script><script src="shell.js" defer></script><script src="fx.js" defer></script></body></html>

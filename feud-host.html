@@ -20,7 +20,7 @@
 <section id="stage" class="hide"><canvas id="s3d" aria-label="3D stage with team podiums and player emojis" style="width:100%;height:280px;display:block;border-radius:24px;margin-bottom:12px"></canvas><div id="top"></div><div class="stage" id="st"></div><div id="ctl"></div><div id="call"></div></section>
 </main>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script><script src="config.js"></script><script src="lamp.js"></script><script src="stage3d.js"></script><script src="call.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script><script src="config.js"></script><script src="lamp.js"></script><script src="stage3d.js"></script><script src="call.js"></script><script src="sound.js"></script><script src="react.js"></script><script src="celebrate.js"></script><script src="spline.js"></script>
 <script>
 let G,P=[],ans=[],cheat=false,nextMode=false,CODES={},ROUNDS=[],QUEUE=[],RN=1;
 (async()=>{loadTheme();const{data:ok}=await sb.rpc('is_host');if(!ok){g('gate').classList.remove('hide');return}
@@ -103,4 +103,4 @@ g('ctl').onclick=async e=>{if(e.target.id==='callbtn'){Call.toggle(g('call'),G.i
  else if(a==='next'&&QUEUE.length){const r=QUEUE.shift();const{data:d}=await sb.rpc('feud_next_round',{p_game:G.id,p_question:r.question,p_answers:r.answers});if(d&&d.ok){ans=r.answers;RN++;saveQ()}else QUEUE.unshift(r)}
  else if(a==='new'||a==='next'){nextMode=a==='next';if(a==='new'){ROUNDS=[];QUEUE=[];RN=1;listRounds()}g('mk').textContent=nextMode?'Start next round':'Start game';g('stage').classList.add('hide');g('setup').classList.remove('hide');return}
  refresh()};
-</script><script src="fx.js" defer></script><script src="bg3d.js" defer></script><script src="shell.js" defer></script></body></html>
+</script><script src="fx.js" defer></script><script src="bg3d.js" defer></script><script src="shell.js" defer></script><script>React.bar(()=>typeof G!=='undefined'&&G?'react-feud-'+G.id:null,()=>{if(typeof G==='undefined'||!G)return null;const r=G.red_score,b=G.blue_score,tie=r===b,w=r>b?'red':'blue';return{title:tie?"It's a tie!":(w==='red'?'RED':'BLUE')+' TEAM WINS!',sub:r+' to '+b,color:tie?'#FFC857':(w==='red'?'#FF6B6B':'#5AA9FF'),emojis:(typeof P!=='undefined'?P:[]).filter(p=>tie||p.team===w).map(p=>p.emoji)}});</script></body></html>

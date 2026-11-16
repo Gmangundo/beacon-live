@@ -33,7 +33,8 @@ html,body{overflow-x:hidden}.wrap{box-sizing:border-box;width:100%;max-width:104
 <a class="card mode m2" href="feud.html"><span class="tag">FAMILY FEUD</span><b>Red vs Blue</b><span class="d">Join your team, buzz in and guess the top answers.</span></a>
 <a class="card mode m3" href="present.html"><span class="tag">HOST</span><b>Run a game</b><span class="d">Log in to host a quiz or Family Feud.</span></a>
 </section>
-<p class="foot">Only your name is used. Session results are deleted after 30 days. <a href="studies.html">Manage studies</a></p>
+<section style="margin-top:36px;text-align:center"><div class="small" style="letter-spacing:.14em;font-weight:800">COMING SOON</div><div style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:12px"><span style="padding:8px 16px;border-radius:999px;background:rgba(255,255,255,.08);border:1px dashed rgba(255,255,255,.25);font-weight:700;font-size:.9rem">Bingo</span><span style="padding:8px 16px;border-radius:999px;background:rgba(255,255,255,.08);border:1px dashed rgba(255,255,255,.25);font-weight:700;font-size:.9rem">Team race</span><span style="padding:8px 16px;border-radius:999px;background:rgba(255,255,255,.08);border:1px dashed rgba(255,255,255,.25);font-weight:700;font-size:.9rem">Power-ups</span><span style="padding:8px 16px;border-radius:999px;background:rgba(255,255,255,.08);border:1px dashed rgba(255,255,255,.25);font-weight:700;font-size:.9rem">isiZulu</span><span style="padding:8px 16px;border-radius:999px;background:rgba(255,255,255,.08);border:1px dashed rgba(255,255,255,.25);font-weight:700;font-size:.9rem">isiXhosa</span><span style="padding:8px 16px;border-radius:999px;background:rgba(255,255,255,.08);border:1px dashed rgba(255,255,255,.25);font-weight:700;font-size:.9rem">Afrikaans</span><span style="padding:8px 16px;border-radius:999px;background:rgba(255,255,255,.08);border:1px dashed rgba(255,255,255,.25);font-weight:700;font-size:.9rem">Sesotho</span></div></section>
+<p class="foot"><a href="profile.html">My profile and leaderboards</a> &middot; Only your name is used. Session results are deleted after 30 days. <a href="studies.html">Manage studies</a></p>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
@@ -54,4 +55,4 @@ const still=matchMedia('(prefers-reduced-motion:reduce)').matches;
  const s=still?0:t/1000;orb.rotation.y=s*.4;orb.rotation.x=s*.2;ring.rotation.z=s*.3;pts.rotation.y=s*.02;
  em.forEach(e=>{const a=e.userData.a+s*.35;e.position.set(Math.cos(a)*3.6,Math.sin(a*1.3)*1.4,Math.sin(a)*3.6)});
  C.position.x+=(mx*2-C.position.x)*.05;C.position.y+=(-my*1.5-C.position.y)*.05;C.lookAt(0,0,0);R.render(S,C)})(0)})();
-</script><script src="fx.js" defer></script></body></html>
+</script><script src="spline.js"></script><script src="fx.js" defer></script></body></html>

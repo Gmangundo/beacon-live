@@ -56,7 +56,7 @@
 </main>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<script src="config.js"></script><script src="lamp.js"></script>
+<script src="config.js"></script><script src="lamp.js"></script><script src="sound.js"></script><script src="react.js"></script><script src="celebrate.js"></script><script src="spline.js"></script>
 <script>
 const TF=['True','False'];
 let S,code,total=0,ses,res,lb,ppl=[],qrEl=null;
@@ -92,7 +92,7 @@ function resultsBlock(q,shown){
  return `<div class="opts">${o.map((op,i)=>`<div class="opt ${CL[i]}" style="${shown&&q.kind!=='poll'&&i!==ses.reveal_correct_index?'opacity:.4':''}"><b>${SH[i]}</b>${esc(op)}${shown&&q.kind!=='poll'&&i===ses.reveal_correct_index?' (correct)':''}${shown?`<span style="margin-left:auto">${q.kind==='poll'?Math.round(c[i]/sum*100)+'%':c[i]}</span><i class="fill" style="width:${c[i]/sum*100}%;background:rgba(255,255,255,.35);position:absolute;left:0;bottom:0;height:8px"></i>`:''}</div>`).join('')}</div>`}
 function paint(){const st=ses.status,q=ses.current_question;let h='';
  if(st==='lobby'){h=`<h1>Join at ${esc(location.host+location.pathname.replace(/[^/]*$/,''))}</h1><p class="small">or scan the code</p><div class="ring" style="width:auto;height:auto;background:none;font-size:clamp(3.5rem,13vw,8rem);font-family:'Inter',sans-serif;font-weight:900;letter-spacing:-.02em;color:var(--accent)"><span>${esc(code)}</span></div><div id="qr" class="qr"></div><h2>${ppl.length} joined</h2><div>${ppl.map(x=>`<span class="chip">${esc(x.nickname)}<button data-rm="${x.id}" aria-label="Remove ${esc(x.nickname)}">x</button></span>`).join('')}</div>`}
- else if(st==='leaderboard'||st==='ended'){const top=lb?.top||[],mx=Math.max(1,...top.map(r=>r.score)),medals=['🥇','🥈','🥉'];if(st==='ended'&&!window.__conf){window.__conf=1;confettiBurst(120)}
+ else if(st==='leaderboard'||st==='ended'){const top=lb?.top||[],mx=Math.max(1,...top.map(r=>r.score)),medals=['🥇','🥈','🥉'];if(st==='ended'&&!window.__conf){window.__conf=1;confettiBurst(120);Celebrate.podium(lb,window.E||{})}
   h=`<h1>${st==='ended'?'Thank you for joining!':'Leaderboard'}</h1><ul class="lb">${top.map(r=>`<li><span class="rank">${r.rank}</span><span class="av">${(window.E||{})[r.nickname]||medals[r.rank-1]||'⭐'}</span><div class="bar"><i class="fillbar ${CL[(r.rank-1)%4]}" data-w="${Math.max(10,r.score/mx*100)}"></i><span class="lbl">${esc(r.nickname)}</span><span class="pts">${r.score}</span></div></li>`).join('')}</ul>`}
  else{const shown=st==='revealed';
   h=`<p class="small">Question ${q.index+1} of ${q.total}</p><h1 style="font-size:clamp(1.8rem,5vw,3.6rem)">${esc(q.prompt)}</h1>${st==='question'?'<div class="ring" id="ringwrap"><span id="tm"></span></div>':''}<p>${res?res.answered:0} of ${res?res.participants:0} answered</p>${resultsBlock(q,shown)}`}
@@ -105,10 +105,10 @@ function paint(){const st=ses.status,q=ses.current_question;let h='';
 g('live').onclick=async e=>{const rm=e.target.dataset.rm,a=e.target.dataset.a;if(rm){await sb.rpc('remove_participant',{p_participant_id:rm});return tick()}if(!a)return;e.target.disabled=true;
  let er;
  if(a==='next')er=(await sb.rpc('start_question',{p_session_id:S,p_index:ses.current_index+1})).error;
- if(a==='lock')er=(await sb.rpc('lock_question',{p_session_id:S})).error;if(a==='reveal')er=(await sb.rpc('reveal_question',{p_session_id:S})).error;
+ if(a==='lock'){er=(await sb.rpc('lock_question',{p_session_id:S})).error;if(!er)Sound.lock()}if(a==='reveal'){er=(await sb.rpc('reveal_question',{p_session_id:S})).error;if(!er)Sound.reveal()}
  if(a==='board')er=(await sb.rpc('show_leaderboard',{p_session_id:S})).error;if(a==='end')er=(await sb.rpc('end_session',{p_session_id:S})).error;
  if(er){alert(er.message==='no_such_question'||er.message?.includes('no_such_question')?'This session lost its study (it may have been deleted). Please end it and start a new one from a current study.':'Something went wrong: '+er.message);if(er.message?.includes('no_such_question')){localStorage.removeItem('lampHost');location.reload()}}
  tick()};
 setInterval(()=>{const t=g('tm'),w=g('ringwrap');if(!t||!ses||ses.status!=='question')return;const left=Math.max(0,(new Date(ses.question_ends_at)-now())/1000),total=ses.current_question.time_limit;
  t.textContent=Math.ceil(left)+'s';if(w){w.style.setProperty('--pct',Math.max(0,left/total*100));w.classList.toggle('low',left<=5&&left>0)}},150);
-</script><script src="fx.js" defer></script><script src="bg3d.js" defer></script></body></html>
+</script><script src="fx.js" defer></script><script src="bg3d.js" defer></script><script>React.bar(()=>typeof S!=='undefined'&&S?'react-'+S:null,()=>typeof lb!=='undefined'&&lb&&lb.length?Celebrate.build(lb,window.E||{}):null);</script></body></html>

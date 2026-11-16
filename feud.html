@@ -15,7 +15,7 @@
 <section id="game" class="hide"><div id="play"></div><button class="alt" id="callbtn" style="margin-top:14px">Join call (audio)</button><div id="call"></div></section>
 </main>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="config.js"></script><script src="lamp.js"></script><script src="call.js"></script>
+<script src="config.js"></script><script src="lamp.js"></script><script src="call.js"></script><script src="sound.js"></script><script src="react.js"></script><script src="celebrate.js"></script><script src="spline.js"></script>
 <script>
 const EM=['🦁','🐑','🕊️','🔥','⭐','🙏','👑','🌟','🎺','🌿','🕯️','🛡️'];
 const ERR={nickname_taken:'That name is taken. Try another one.',invalid_code:"We couldn't find that code. Check the screen and try again.",bad_nickname:'Please use 2 to 20 characters for your name.',bad_emoji:'Please pick an emoji.',net:'Connection problem. Try again.'};
@@ -40,4 +40,4 @@ function draw(){const k=[D.status,D.buzzed_by,D.active,D.question].join();if(k==
  g('play').innerHTML=`<div class="band">${T==='red'?'RED':'BLUE'} TEAM</div><div style="font-size:3rem">${esc(me.emoji)}</div><b>${esc(me.nickname)}</b><h2>${esc(D.question)}</h2>${body}`}
 g('callbtn').onclick=()=>Call.toggle(g('call'),gid,true);
 g('play').onclick=async e=>{if(!e.target.closest('#buzz'))return;navigator.vibrate&&navigator.vibrate(60);const{data}=await sb.rpc('feud_buzz',{p_game:gid});drawn='';refresh()};
-</script><script src="fx.js" defer></script><script src="bg3d.js" defer></script><script src="shell.js" defer></script></body></html>
+</script><script src="fx.js" defer></script><script src="bg3d.js" defer></script><script src="shell.js" defer></script><script>React.listen(()=>typeof gid!=='undefined'&&gid?'react-feud-'+gid:null);</script></body></html>

@@ -24,7 +24,7 @@
 <section id="game" class="hide" aria-live="polite"><div id="box"></div><p id="note" class="err"></p></section>
 </main>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="config.js"></script><script src="lamp.js"></script>
+<script src="config.js"></script><script src="lamp.js"></script><script src="sound.js"></script><script src="react.js"></script><script src="celebrate.js"></script><script src="progress.js"></script><script src="spline.js"></script>
 <script>const EM=["🦁","🐑","🕊️","🔥","⭐","🙏","👑","🌟","🎺","🌿","🕯️","🛡️"];let em=localStorage.lampEm||EM[0];
 g("em").innerHTML=EM.map(e=>`<button type="button" data-e="${e}" class="${e===em?"on":""}" aria-label="Emoji ${e}">${e}</button>`).join("");
 g("em").onclick=e=>{const b=e.target.closest("button");if(!b)return;em=b.dataset.e;localStorage.lampEm=em;g("em").querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b))};</script>
@@ -64,11 +64,12 @@ async function draw(){const k=[ses.status,ses.current_index,stt.choice_index,stt
  else if(ses.status==='revealed'){
   if(q.kind==='poll'||q.kind==='rating')fadeSwap(box,'<h2>Thanks for sharing!</h2>');
   else if(q.kind==='word_cloud')fadeSwap(box,'<h2>Thanks for your answer!</h2>');
-  else{const ok=stt.is_correct,ca=stt.correct_index,o=optsFor(q);if(ok)confettiBurst(50);
+  else{const ok=stt.is_correct,ca=stt.correct_index,o=optsFor(q);if(ok){confettiBurst(50);Sound.right()}else Sound.wrong(stt.choice_index==null);
    fadeSwap(box,(ok?`<h2>Well done! +${stt.points}</h2>`:stt.choice_index==null?'<h2>Time ran out. No worries!</h2>':'<h2>Good try!</h2>')+(ok?'':`<p>The answer was ${SH[ca]} ${esc(o[ca])}.</p>`)+`<p>Score ${stt.score} - rank ${stt.rank} of ${stt.total}</p>`)}}
  else{const{data}=await sb.rpc('get_leaderboard',{p_session_id:S,p_limit:5});const ended=ses.status==='ended';if(ended){localStorage.removeItem('lamp');confettiBurst(90)}
   const top=data?.top||[],mx=Math.max(1,...top.map(r=>r.score));
   const{data:ej}=await sb.rpc('get_emojis',{p_session:S});const E=Object.fromEntries((ej||[]).map(x=>[x.nickname,x.emoji]));
+  if(ended&&!window.__cel){window.__cel=1;Celebrate.podium(data,E);Progress.award(S,me)}
   fadeSwap(box,`<h2>${ended?'Thanks for joining!':'Leaderboard'}</h2><ul class="lb">${top.map(r=>`<li class="${r.is_me?'me':''}"><span class="rank">${r.rank}</span><div class="bar"><i class="fillbar ${CL[r.rank%4]}" data-w="${Math.max(14,r.score/mx*100)}"></i><span class="lbl">${E[r.nickname]?esc(E[r.nickname])+' ':''}${esc(r.nickname)}</span><span class="pts" style="color:${r.score>0?'#fff':'inherit'}">${r.score}</span></div></li>`).join('')}</ul>`+(data?.me?`<p>You: rank ${data.me.rank} of ${data.total} with ${data.me.score} points</p>`:''),
    ()=>requestAnimationFrame(()=>requestAnimationFrame(()=>box.querySelectorAll('.fillbar').forEach(el=>el.style.width=el.dataset.w+'%'))));}}
 g('box').onclick=async e=>{
@@ -84,4 +85,4 @@ g('box').onclick=async e=>{
 setInterval(()=>{const t=g('tm'),w=g('ringwrap');if(!t||!ses||ses.status!=='question')return;const q=ses.current_question,left=Math.max(0,(new Date(ses.question_ends_at)-now())/1000),total=q.time_limit;
  t.textContent=Math.ceil(left)+'s';if(w){w.style.setProperty('--pct',Math.max(0,left/total*100));w.classList.toggle('low',left<=5&&left>0)}if(!left&&!t.dataset.z){t.dataset.z=1;refresh()}},150);
 addEventListener('online',refresh);document.addEventListener('visibilitychange',()=>{if(!document.hidden&&S)refresh()});
-</script><script src="fx.js" defer></script><script src="bg3d.js" defer></script><script src="shell.js" defer></script></body></html>
+</script><script src="fx.js" defer></script><script src="bg3d.js" defer></script><script src="shell.js" defer></script><script>React.listen(()=>typeof S!=='undefined'&&S?'react-'+S:null);</script></body></html>
