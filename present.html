@@ -3,7 +3,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#070A14">
 <title>Beacon host</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="lamp.css"><link rel="stylesheet" href="beacon-theme.css"></head>
+<link rel="stylesheet" href="lamp.css"><link rel="stylesheet" href="beacon-theme.css"><link rel="stylesheet" href="feud-ui.css"></head>
 <body><main class="wide"><nav style="display:flex;gap:10px;flex-wrap:wrap;margin:0 0 16px"><a href="present.html" style="padding:10px 16px;border-radius:999px;background:rgba(255,200,87,.2);border:1px solid #FFC857;color:inherit;text-decoration:none;font-weight:700">Quiz host</a><a href="feud-host.html" style="padding:10px 16px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);color:inherit;text-decoration:none;font-weight:700">Family Feud host</a><a href="studies.html" style="padding:10px 16px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);color:inherit;text-decoration:none;font-weight:700">Studies and AI</a></nav>
 <section id="login" style="max-width:420px;margin:auto">
   <div class="brand"><svg class="logo" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -56,7 +56,7 @@
 </main>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<script src="config.js"></script><script src="lamp.js"></script><script src="sound.js"></script><script src="react.js"></script><script src="celebrate.js"></script><script src="spline.js"></script>
+<script src="config.js"></script><script src="lamp.js"></script><script src="feud-ui.js"></script><script src="sound.js"></script><script src="react.js"></script><script src="celebrate.js"></script><script src="spline.js"></script>
 <script>
 const TF=['True','False'];
 let S,code,total=0,ses,res,lb,ppl=[],qrEl=null;
@@ -93,7 +93,7 @@ function resultsBlock(q,shown){
 function paint(){const st=ses.status,q=ses.current_question;let h='';
  if(st==='lobby'){h=`<h1>Join at ${esc(location.host+location.pathname.replace(/[^/]*$/,''))}</h1><p class="small">or scan the code</p><div class="ring" style="width:auto;height:auto;background:none;font-size:clamp(3.5rem,13vw,8rem);font-family:'Inter',sans-serif;font-weight:900;letter-spacing:-.02em;color:var(--accent)"><span>${esc(code)}</span></div><div id="qr" class="qr"></div><h2>${ppl.length} joined</h2><div>${ppl.map(x=>`<span class="chip">${esc(x.nickname)}<button data-rm="${x.id}" aria-label="Remove ${esc(x.nickname)}">x</button></span>`).join('')}</div>`}
  else if(st==='leaderboard'||st==='ended'){const top=lb?.top||[],mx=Math.max(1,...top.map(r=>r.score)),medals=['🥇','🥈','🥉'];if(st==='ended'&&!window.__conf){window.__conf=1;confettiBurst(120);Celebrate.podium(lb,window.E||{})}
-  h=`<h1>${st==='ended'?'Thank you for joining!':'Leaderboard'}</h1><ul class="lb">${top.map(r=>`<li><span class="rank">${r.rank}</span><span class="av">${(window.E||{})[r.nickname]||medals[r.rank-1]||'⭐'}</span><div class="bar"><i class="fillbar ${CL[(r.rank-1)%4]}" data-w="${Math.max(10,r.score/mx*100)}"></i><span class="lbl">${esc(r.nickname)}</span><span class="pts">${r.score}</span></div></li>`).join('')}</ul>`}
+  h=`<h1>${st==='ended'?'Thank you for joining!':'Leaderboard'}</h1><ul class="lb">${top.map(r=>`<li><span class="rank">${r.rank}</span>${Av.html((window.E||{})[r.nickname]||medals[r.rank-1]||'⭐',{size:46,name:r.nickname,cls:r.rank===1?'cheer':''})}<div class="bar"><i class="fillbar ${CL[(r.rank-1)%4]}" data-w="${Math.max(10,r.score/mx*100)}"></i><span class="lbl">${esc(r.nickname)}</span><span class="pts">${r.score}</span></div></li>`).join('')}</ul>`}
  else{const shown=st==='revealed';
   h=`<p class="small">Question ${q.index+1} of ${q.total}</p><h1 style="font-size:clamp(1.8rem,5vw,3.6rem)">${esc(q.prompt)}</h1>${st==='question'?'<div class="ring" id="ringwrap"><span id="tm"></span></div>':''}<p>${res?res.answered:0} of ${res?res.participants:0} answered</p>${resultsBlock(q,shown)}`}
  if(st==='question'){const stage=g('stage');stage.style.transition='none';stage.style.opacity=1;stage.style.transform='none';stage.innerHTML=h;if(g('qr'))g('qr').appendChild(qrEl)}

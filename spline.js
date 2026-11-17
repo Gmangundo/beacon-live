@@ -10,7 +10,8 @@ window.BEACON_SPLINE={all:'https://my.spline.design/lightningbulb-tE3BoDXZiPzLCy
  bg=hero?(u.home||u.all):(u.all||u.home),share=/^https?:\/\/my\.spline\.design\//.test(bg||''),
  ok=!c.saveData&&!/^(slow-2g|2g|3g)$/.test(c.effectiveType||'')&&(navigator.deviceMemory||4)>=4&&innerWidth>=700;
  if(!ok||!(bg||u.winner))return;
- window.BEACON_SPLINE_BG=!!bg; // tells bg3d.js not to draw the built-in 3D underneath
+ window.BEACON_SPLINE_BG=!!bg;
+ {const st=document.createElement('style');st.textContent='body{background:transparent!important}';document.head.appendChild(st)} // tells bg3d.js not to draw the built-in 3D underneath
  if(u.winner||(bg&&!share)){const s=document.createElement('script');s.type='module';s.src='https://cdn.jsdelivr.net/npm/@splinetool/viewer@1.10.64/build/spline-viewer.js';document.head.appendChild(s)}
  if(!bg||!document.body)return;
  const fade='position:fixed;inset:0;width:100%;height:100%;z-index:-2;opacity:0;transition:opacity .8s;',shown=()=>{v.style.opacity='1';if(hero)hero.style.display='none'};
