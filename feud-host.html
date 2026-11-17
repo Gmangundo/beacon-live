@@ -15,14 +15,14 @@
 <div style="display:flex;gap:8px"><input id="aii" placeholder="Tell the AI about your group and topic" aria-label="Message to the AI" style="flex:1" autocomplete="off"><button class="primary" id="aig" style="width:auto;padding:12px 22px">Send</button></div></div>
 <h2 style="font-size:1.1rem;margin:18px 0 6px">Rounds in this game</h2><div id="rl" style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px"></div>
 <input id="q" placeholder="Question" aria-label="Question">
-<textarea id="ans" rows="6" placeholder="One answer per line, with points:&#10;Genesis, 38&#10;Psalms, 24&#10;John, 18" aria-label="Answers and points"></textarea>
+<textarea id="ans" rows="6" placeholder="One answer per line, with points:&#10;Genesis, 38&#10;Psalms | Psalm | Book of Psalms, 24&#10;John, 18&#10;(words after | are other wordings players may type)" aria-label="Answers and points"></textarea>
 <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="alt" id="add">Add this round</button><button class="primary" id="mk">Start game</button></div><p id="msg" class="err" role="alert"></p></section>
 <section id="stage" class="hide"><div id="top"></div><div class="stage" id="st"></div><div id="ctl"></div><div id="call"></div></section>
 </main>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script src="config.js"></script><script src="lamp.js"></script><script src="feud-ui.js"></script><script src="call.js"></script><script src="sound.js"></script><script src="react.js"></script><script src="celebrate.js"></script><script src="spline.js"></script>
 <script>
-let G,P=[],ans=[],PEND=null,SIG='',LT='',MOOD=null,SEEN=new Set(),FIRST=true,cheat=false,nextMode=false,CODES={},ROUNDS=[],QUEUE=[],RN=1;
+let G,P=[],ans=[],PEND=null,TSEQ=-1,TSTART=0,TFIRED=-1,SIG='',LT='',MOOD=null,SEEN=new Set(),FIRST=true,cheat=false,nextMode=false,CODES={},ROUNDS=[],QUEUE=[],RN=1;
 (async()=>{loadTheme();const{data:ok}=await sb.rpc('is_host');if(!ok){g('gate').classList.remove('hide');return}
  const{data:r}=await sb.from('feud_games').select('*').eq('active',true).order('created_at',{ascending:false}).limit(1);
  if(r&&r[0])open(r[0]);else g('setup').classList.remove('hide')})();
@@ -37,7 +37,7 @@ async function aiSend(){const t=g('aii').value.trim();if(!t)return;say('user',t)
  AIM.push({role:'model',text:data.reply});say('ai',data.reply);
  if(data.ready&&Array.isArray(data.rounds)&&data.rounds.length){data.rounds.forEach(r=>{if(r&&r.question&&Array.isArray(r.answers))ROUNDS.push({question:String(r.question),answers:r.answers.map(x=>({text:String(x.text).replace(/,/g,' '),points:parseInt(x.points)||0}))})});listRounds();say('ai','I added '+data.rounds.length+' rounds below. Remove any you do not want, then click Start game.')}}
 g('aig').onclick=aiSend;g('aii').onkeydown=e=>{if(e.key==='Enter')aiSend()};
-function parseAns(){return g('ans').value.split('\n').map(l=>l.trim()).filter(Boolean).map(l=>{const i=l.lastIndexOf(',');return{text:(i<0?l:l.slice(0,i)).trim(),points:i<0?0:parseInt(l.slice(i+1))||0}})}
+function parseAns(){return g('ans').value.split('\n').map(l=>l.trim()).filter(Boolean).map(l=>{const i=l.lastIndexOf(','),t=(i<0?l:l.slice(0,i)).trim(),p=t.split('|').map(x=>x.trim()).filter(Boolean);return{text:p[0]||t,alts:p.slice(1),points:i<0?0:parseInt(l.slice(i+1))||0}})}
 function listRounds(){g('rl').innerHTML=ROUNDS.map((r,i)=>`<div style="display:flex;gap:10px;align-items:center;padding:10px 14px;border-radius:14px;background:rgba(255,255,255,.07)"><b style="color:var(--accent2)">${i+1}</b><span style="flex:1">${esc(r.question)} <span class="small">(${r.answers.length} answers)</span></span><button class="alt" data-rm="${i}" style="width:auto;padding:6px 12px">Remove</button></div>`).join('')||'<p class="small">No rounds yet. Chat with the AI, or type one below and click Add this round.</p>'}
 listRounds();
 g('rl').onclick=e=>{const b=e.target.closest('[data-rm]');if(b){ROUNDS.splice(+b.dataset.rm,1);listRounds()}};
@@ -87,6 +87,9 @@ async function fmGen(){const t=g('fmt').value.trim();if(!t){g('fmm').textContent
  if(rs.length<5){g('fmm').textContent=(error||!data)?await aiWhy(error,data):'The AI did not return 5 questions. Please try again.';return}
  FM.q=rs.map(r=>({question:String(r.question),answers:r.answers.map(a=>({text:String(a.text),points:parseInt(a.points)||0}))}));fmDraw()}
 const nm=p=>p.emoji+' '+p.nickname;
+function vsHtml(s){const[a,b]=String(s).split('  vs  '),p=x=>{x=x||'';const i=x.indexOf(' ');return{e:i<0?x:x.slice(0,i),n:i<0?'':x.slice(i+1)}},A=p(a),B=p(b);
+ return`<div class="vs"><div class="vsl">${Av.html(A.e,{size:'10cqw',cls:'hop',name:A.n})}<b>${esc(A.n)}</b><small>RED</small></div><div class="vsx">VS</div><div class="vsr">${Av.html(B.e,{size:'10cqw',cls:'hop',name:B.n})}<b>${esc(B.n)}</b><small>BLUE</small></div><div class="vsnote">BUZZERS OPEN</div></div>`}
+const tActive=()=>G&&G.mode==='auto'&&G.turn_secs>0&&G.turn_user&&!G.has_pending&&(G.phase==='play'||G.phase==='steal'||(G.phase==='faceoff'&&G.status==='buzzed'));
 function crew(t){return P.filter(p=>p.team===t).map(p=>{let c='';if(G.turn_name&&nm(p)===G.turn_name)c='hop ring';else if(MOOD&&MOOD.team===t&&MOOD.res==='hit')c='cheer';else if(MOOD&&MOOD.team===t&&MOOD.res==='miss'&&MOOD.name===nm(p))c='shake';return Av.html(p.emoji,{size:'4.6cqw',cls:c,name:p.nickname})}).join('')}
 function msg(){const lt=G.last_try,T=t=>t==='red'?'RED':'BLUE';
  if(G.mode!=='auto')return[G.status==='open'?'Buzzers open':G.status==='buzzed'?esc(G.buzzed_by)+' buzzed first!':'Buzzers locked',''];
@@ -96,36 +99,40 @@ function msg(){const lt=G.last_try,T=t=>t==='red'?'RED':'BLUE';
  if(G.phase==='play')return[T(G.ctrl_team)+' TEAM is playing &middot; '+esc(G.turn_name||'')+'&rsquo;s turn',l];
  if(G.phase==='steal')return['STEAL! '+esc(G.turn_name||'')+' has one guess',l];
  return['Round over',l]}
-function draw(){fx();const lts=JSON.stringify(G.last_try||null);
+function draw(){fx();if(G.turn_seq!==TSEQ){TSEQ=G.turn_seq;TSTART=Date.now()}const lts=JSON.stringify(G.last_try||null);
  if(lts!==LT){LT=lts;if(G.last_try&&G.last_try.res!=='close'&&!FIRST){MOOD={team:G.last_try.team,res:G.last_try.res,name:G.last_try.name};setTimeout(()=>{MOOD=null;SIG='';draw()},2400)}}
  const sig=JSON.stringify([G,P,cheat,PEND,CODES,RN,QUEUE.length,!!MOOD,ans.length]);if(sig===SIG)return;SIG=sig;
- if(!G.board.length)SEEN=new Set();const rev=i=>G.board.find(r=>r.i===i),n=G.answer_count,cols=n>4?2:1,rows=Math.ceil(n/cols),auto=G.mode==='auto',[m1,m2]=msg();
+ if(!G.board.length)SEEN=new Set();const rev=i=>G.board.find(r=>r.i===i),n=G.answer_count,cols=n>4?2:1,rows=Math.ceil(n/cols),auto=G.mode==='auto',[m1,m2]=msg(),spot=G.status==='buzzed'&&G.buzzed_team?G.buzzed_team:'',vs=auto&&G.phase==='faceoff'&&G.status==='open'&&G.fo_names;
  const slot=i=>{const r=rev(i);if(!r)return`<div class="slot"><span class="idx">${i+1}</span></div>`;const nw=!SEEN.has(i)&&!FIRST;return`<div class="slot on${nw?' flip':''}${r.rest?' rest':''}"><span class="idx">${i+1}</span><span class="t">${esc(r.text)}</span><span class="p">${r.points}</span></div>`};
  g('top').innerHTML=`<p class="small" style="text-align:center">Join at this site's Family Feud page. Red code <b>${CODES.red||'...'}</b> &middot; Blue code <b>${CODES.blue||'...'}</b></p><div class="small" style="text-align:center">Round ${RN} of ${RN+QUEUE.length}</div><h1 style="text-align:center">${esc(G.question)}</h1>`;
  g('st').className='';
- g('st').innerHTML=`<div class="arena"><div class="oval"></div>
-  <div class="wing wl"><div class="sbox r"><small>RED</small><b>${G.red_score}</b></div><div class="crew">${crew('red')}</div></div>
-  <div class="wing wr"><div class="sbox b"><small>BLUE</small><b>${G.blue_score}</b></div><div class="crew">${crew('blue')}</div></div>
+ g('st').innerHTML=`<div class="arena${spot?' hasspot':''}"><div class="oval"></div>${spot?`<div class="beam ${spot}"></div>`:''}
+  <div class="wing wl${spot==='red'?' spot red':''}"><div class="sbox r"><small>RED</small><b>${G.red_score}</b></div><div class="crew">${crew('red')}</div></div>
+  <div class="wing wr${spot==='blue'?' spot blue':''}"><div class="sbox b"><small>BLUE</small><b>${G.blue_score}</b></div><div class="crew">${crew('blue')}</div></div>
   <div class="sbox bank"><small>${auto?'BANK':'ROUND'}</small><b>${auto?G.bank:G.board.reduce((a,r)=>a+(r.rest?0:r.points),0)}</b></div>
   ${G.mult>1?`<div class="mult">${G.mult===2?'DOUBLE':'TRIPLE'} POINTS</div>`:''}
   <div class="panel"><div class="slots" style="grid-template-columns:repeat(${cols},1fr);grid-template-rows:repeat(${rows},1fr)">${Array.from({length:n},(_,i)=>slot(i)).join('')}</div></div>
-  <div class="xs">${[0,1,2].map(i=>`<span class="${G.strikes>i?'on':''}">X</span>`).join('')}</div>
+  ${vs?vsHtml(G.fo_names):''}<div class="xs">${[0,1,2].map(i=>`<span class="${G.strikes>i?'on':''}">X</span>`).join('')}</div>
   <div class="logo"><b>BEACON</b><b>FEUD</b></div></div>
-  <div class="tick" style="${G.buzzed_team&&!auto?'color:'+(G.buzzed_team==='red'?'#FF6B6B':'#5AA9FF'):''}">${m1}<span class="sub">${m2}</span></div>`;
+  <div class="tick" style="${G.buzzed_team&&!auto?'color:'+(G.buzzed_team==='red'?'#FF6B6B':'#5AA9FF'):''}">${m1}<span class="sub">${m2}</span>${tActive()?'<div class="tbar" id="tbh"><i></i></div>':''}</div>`;
  G.board.forEach(r=>SEEN.add(r.i));FIRST=false;
  const judge=auto&&PEND&&G.has_pending?`<div class="judge"><b>Close call: your decision</b><p style="margin:8px 0">${esc(G.last_try?G.last_try.name:'A player')} typed &ldquo;${esc(PEND.text)}&rdquo;${ans[PEND.idx]?'. Is that &ldquo;'+esc(ans[PEND.idx].text)+'&rdquo;?':''}</p><div class="cc"><button class="primary" data-a="accept">Accept</button><button class="alt" data-a="reject">Reject</button></div></div>`:'';
  const list=cheat&&auto?`<p class="small" style="text-align:center">${ans.map((a,i)=>(rev(i)?'&#10003; ':'')+(i+1)+'. '+esc(a.text)+' ('+a.points+')').join(' &middot; ')}</p>`:'';
  g('ctl').innerHTML=judge+`<div class="cc" style="justify-content:center"><button class="${auto?'primary':'alt'}" data-a="mode" data-m="${auto?'manual':'auto'}">Phone answers: ${auto?'ON':'OFF'}</button>`+
-  (auto?(G.phase==='idle'?'<button class="primary" data-a="start">Start face-off</button>':'')+(['faceoff','play','steal'].includes(G.phase)?'<button class="alt" data-a="skip">Skip turn</button>':'')+(G.phase==='over'&&G.board.length<G.answer_count?'<button class="alt" data-a="rest">Reveal the rest</button>':''):
+  (auto?(G.phase==='idle'?'<button class="primary" data-a="start">Start face-off</button>':'')+(['faceoff','play','steal'].includes(G.phase)?'<button class="alt" data-a="skip">Skip turn</button>':'')+`<button class="alt" data-a="timer">Timer: ${G.turn_secs>0?G.turn_secs+'s':'OFF'}</button>`+(G.phase==='over'&&G.board.length<G.answer_count?'<button class="alt" data-a="rest">Reveal the rest</button>':''):
    '<button class="primary" data-a="open">Open buzzers</button><button class="alt" data-a="closed">Lock buzzers</button><button class="alt" data-a="strike">Add strike</button>')+
   `<button class="alt" data-a="fm">Fast Money</button><button class="alt" data-a="mult" data-m="1">Points x1</button><button class="alt" data-a="mult" data-m="2">Double</button><button class="alt" data-a="mult" data-m="3">Triple</button><button class="alt" data-a="next">Next question${QUEUE.length?' ('+QUEUE.length+' left)':''}</button><button class="alt" data-a="new">New game</button><button class="alt" id="callbtn">Join call</button><label class="small"><input type="checkbox" id="ch" ${cheat?'checked':''}> Show my answers</label></div>`+list+
   (auto?'':Array.from({length:n},(_,i)=>rev(i)?'':`<div class="cc"><span>Reveal ${i+1}${cheat&&ans[i]?' ('+esc(ans[i].text)+')':''}:</span><button class="alt" data-a="rev" data-i="${i}" data-t="red">Red</button><button class="alt" data-a="rev" data-i="${i}" data-t="blue">Blue</button><button class="alt" data-a="rev" data-i="${i}" data-t="">No points</button></div>`).join(''))}
+setInterval(()=>{if(!tActive())return;const el=(Date.now()-TSTART)/1000,f=Math.max(0,1-el/G.turn_secs),b=g('tbh');
+ if(b){b.firstChild.style.width=(f*100)+'%';b.classList.toggle('low',f<.3)}
+ if(el>G.turn_secs+1.5&&TFIRED!==G.turn_seq){TFIRED=G.turn_seq;sb.rpc('feud_skip',{p_game:G.id}).then(()=>refresh())}},250);
 g('ctl').onclick=async e=>{if(e.target.id==='callbtn'){Call.toggle(g('call'),G.id,false);return}if(e.target.id==='ch'){cheat=e.target.checked;draw();return}const b=e.target.closest('button[data-a]');if(!b)return;const a=b.dataset.a;
  if(a==='open'||a==='closed')await sb.rpc('feud_status',{p_game:G.id,p_status:a});
  else if(a==='mode')await sb.rpc('feud_set_mode',{p_game:G.id,p_mode:b.dataset.m});
  else if(a==='start'){const{data:d}=await sb.rpc('feud_auto_start',{p_game:G.id});if(d&&!d.ok)alert(d.error==='no_players'?'Each team needs at least one player. Ask players to join with their team codes first.':d.error==='already_started'?'This round has already started. Use Next question for a fresh round.':'Could not start the face-off.')}
  else if(a==='accept'||a==='reject')await sb.rpc('feud_confirm',{p_game:G.id,p_accept:a==='accept'});
  else if(a==='skip')await sb.rpc('feud_skip',{p_game:G.id});
+ else if(a==='timer'){const o=[0,15,20,30];await sb.rpc('feud_set_timer',{p_game:G.id,p_secs:o[(o.indexOf(G.turn_secs||0)+1)%o.length]})}
  else if(a==='rest')await sb.rpc('feud_reveal_rest',{p_game:G.id});
  else if(a==='fm'){fmOpen();return}
  else if(a==='mult')await sb.rpc('feud_set_mult',{p_game:G.id,p_mult:+b.dataset.m});

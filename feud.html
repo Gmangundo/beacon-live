@@ -9,7 +9,7 @@
 <section id="join"><div id="brand"></div><h1 style="text-align:center;font-size:1.4rem">Family Feud</h1>
 <input id="code" inputmode="numeric" maxlength="6" placeholder="Team code" aria-label="Team code" autocomplete="off">
 <input id="nick" maxlength="20" placeholder="Your name" aria-label="Your name" autocomplete="off">
-<p class="small">Pick your character</p><div class="avpick" id="em"></div>
+<p class="small">Pick your character</p><div class="avpick" id="em"></div><p class="small avnote" id="lknote"></p>
 <button class="primary" id="go">Join</button><p id="msg" class="err" role="alert"></p>
 <p class="small" style="text-align:center">Your team code puts you on Red or Blue automatically.</p></section>
 <section id="game" class="hide"><div id="play"></div><button class="alt" id="callbtn" style="margin-top:14px">Join call (audio)</button><div id="call"></div></section>
@@ -19,17 +19,16 @@
 <script>
 const EM=window.AVATARS;
 const ERR={nickname_taken:'That name is taken. Try another one.',invalid_code:"We couldn't find that code. Check the screen and try again.",bad_nickname:'Please use 2 to 20 characters for your name.',bad_emoji:'Please pick an emoji.',net:'Connection problem. Try again.'};
-let gid,T,D,me,uid,em=EM[0],drawn='';
+let gid,T,D,me,uid,em=EM[0],drawn='',TSEQ=-1,TSTART=0,PK;
 g('brand').innerHTML=wordmark();
-g('em').innerHTML=EM.map((e,i)=>`<button type="button" data-e="${e}" class="${i?'':'on'}" aria-label="Character ${e}">${Av.html(e,{size:52})}</button>`).join('');
-g('em').onclick=e=>{const b=e.target.closest('button');if(!b)return;em=b.dataset.e;g('em').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b))};
+PK=Av.picker(g('em'),g('lknote'),{cur:em,level:1,onPick:e=>{em=e}});Av.level().then(l=>{PK.level=l});
 async function anon(){const{data:{session}}=await sb.auth.getSession();if(!session){const{error}=await sb.auth.signInAnonymously();if(error)throw error}const{data:{user}}=await sb.auth.getUser();uid=user&&user.id}
 async function tryJoin(code,nick,emoji){try{await anon();const{data,error}=await sb.rpc('feud_join',{p_code:code,p_nick:nick,p_emoji:emoji});if(error||!data)return'net';if(!data.ok)return data.error;
  localStorage.feud=JSON.stringify({code,nick,emoji});gid=data.game_id;T=data.team;me=data;g('join').classList.add('hide');g('game').classList.remove('hide');
  sb.channel('f'+gid).on('postgres_changes',{event:'UPDATE',schema:'public',table:'feud_games',filter:'id=eq.'+gid},refresh).subscribe();setInterval(refresh,3000);refresh();return''}catch(e){return'net'}}
 g('go').onclick=async()=>{g('msg').textContent='';g('go').disabled=true;const e=await tryJoin(g('code').value.trim(),g('nick').value,em);g('go').disabled=false;if(e)g('msg').textContent=ERR[e]||ERR.net};
 (async()=>{loadTheme();const s=localStorage.feud&&JSON.parse(localStorage.feud);if(s){const e=await tryJoin(s.code,s.nick,s.emoji);if(e==='invalid_code')localStorage.removeItem('feud')}})();
-async function refresh(){const{data}=await sb.from('feud_games').select('question,status,buzzed_team,buzzed_by,active,mode,phase,ctrl_team,bank,strikes,turn_user,turn_name,fo_names,fo_red,fo_blue,has_pending,last_try,red_score,blue_score').eq('id',gid).single();if(data){D=data;draw()}}
+async function refresh(){const{data}=await sb.from('feud_games').select('question,status,buzzed_team,buzzed_by,active,mode,phase,ctrl_team,bank,strikes,turn_user,turn_name,fo_names,fo_red,fo_blue,has_pending,last_try,red_score,blue_score,turn_seq,turn_secs').eq('id',gid).single();if(data){D=data;if(D.turn_seq!==TSEQ){TSEQ=D.turn_seq;TSTART=Date.now()}draw()}}
 function draw(){const k=JSON.stringify(D);if(k===drawn)return;drawn=k;
  const mine=!!uid&&D.turn_user===uid,lt=D.last_try,myName=me.emoji+' '+me.nickname,isFo=!!uid&&(uid===D.fo_red||uid===D.fo_blue),other=D.ctrl_team==='red'?'BLUE':'RED';
  const form=(msg,btn)=>`<h2>${msg}</h2><input id="ans" maxlength="60" placeholder="Type your answer" autocomplete="off" aria-label="Your answer"><button class="primary" id="send">${btn}</button><p id="fm" class="err" role="alert"></p>`;
@@ -52,9 +51,10 @@ function draw(){const k=JSON.stringify(D);if(k===drawn)return;drawn=k;
  else body='<h2>Get ready</h2><p>Waiting for the host to start the face-off.</p>';
  const mood=mine?'hop':(lt&&lt.name===myName?(lt.res==='hit'?'cheer':lt.res==='miss'?'shake':'think'):'');
  g('play').className='t'+T[0];
- g('play').innerHTML=`<div class="band">${T==='red'?'RED':'BLUE'} TEAM &middot; ${D.red_score||0} - ${D.blue_score||0}</div>${Av.html(me.emoji,{size:92,cls:mood,name:me.nickname})}<b>${esc(me.nickname)}</b><h2>${esc(D.question)}</h2>${body}${last}`;
+ g('play').innerHTML=`<div class="band">${T==='red'?'RED':'BLUE'} TEAM &middot; ${D.red_score||0} - ${D.blue_score||0}</div>${Av.html(me.emoji,{size:92,cls:mood,name:me.nickname})}${mine&&D.turn_secs>0&&!D.has_pending&&D.phase!=='over'?'<div class="tbar" id="tb"><i></i></div>':''}<b>${esc(me.nickname)}</b><h2>${esc(D.question)}</h2>${body}${last}`;
  if(mine&&g('ans'))setTimeout(()=>{const a=g('ans');a&&a.focus()},50)}
 g('callbtn').onclick=()=>Call.toggle(g('call'),gid,true);
+setInterval(()=>{const b=g('tb');if(!b||!D||!(D.turn_secs>0))return;const fr=Math.max(0,1-(Date.now()-TSTART)/1000/D.turn_secs);b.firstChild.style.width=(fr*100)+'%';b.classList.toggle('low',fr<.3)},250);
 async function sendAns(){const a=g('ans');if(!a||!a.value.trim())return;const b=g('send');b.disabled=true;
  const{data,error}=await sb.rpc('feud_submit',{p_game:gid,p_text:a.value});
  if(error||!data||!data.ok){b.disabled=false;g('fm').textContent=data&&data.error==='not_your_turn'?'It is not your turn any more.':'Could not send. Try again.';drawn='';refresh();return}

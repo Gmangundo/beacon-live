@@ -255,23 +255,28 @@ end$$;
 
 -- exact = same after cleaning (also plural/singular). close = a small typo or one contains the other. none = no match.
 create or replace function public.feud_match(p_answers jsonb, p_board jsonb, p_text text) returns jsonb language plpgsql stable as $$
-declare t text:=public.beacon_norm(p_text); i int; a text; d int; best int:=-1; bd int:=999; lim int;
+declare t text:=public.beacon_norm(p_text); i int; k int; opts jsonb; a text; d int; dd int; best int:=-1; bd int:=999; lim int;
 begin
  if length(t)<1 then return jsonb_build_object('kind','none'); end if;
  for i in 0..jsonb_array_length(p_answers)-1 loop
   if p_board @> jsonb_build_array(jsonb_build_object('i',i)) then continue; end if;
-  a:=public.beacon_norm(p_answers->i->>'text');
-  if a='' then continue; end if;
-  if a=t or a||'s'=t or a=t||'s' then d:=0;
-  else
-   lim:=case when length(a)>=9 then 2 when length(a)>=4 then 1 else 0 end;
-   d:=public.beacon_lev(a,t);
-   if d>lim then
-    if length(t)>=4 and length(a)>=4 and (position(t in a)>0 or position(a in t)>0) then d:=1; else d:=999; end if;
-   elsif d=0 then d:=0;
+  -- the answer's main wording plus any alternatives the host added (Genesis | Book of Genesis)
+  opts:=jsonb_build_array(p_answers->i->>'text')||case when jsonb_typeof(p_answers->i->'alts')='array' then p_answers->i->'alts' else '[]'::jsonb end;
+  dd:=999;
+  for k in 0..jsonb_array_length(opts)-1 loop
+   a:=public.beacon_norm(opts->>k);
+   if a='' then continue; end if;
+   if a=t or a||'s'=t or a=t||'s' then d:=0;
+   else
+    lim:=case when length(a)>=9 then 2 when length(a)>=4 then 1 else 0 end;
+    d:=public.beacon_lev(a,t);
+    if d>lim then
+     if length(t)>=4 and length(a)>=4 and (position(t in a)>0 or position(a in t)>0) then d:=1; else d:=999; end if;
+    end if;
    end if;
-  end if;
-  if d<bd then bd:=d; best:=i; end if;
+   if d<dd then dd:=d; end if;
+  end loop;
+  if dd<bd then bd:=dd; best:=i; end if;
  end loop;
  if best<0 or bd>=999 then return jsonb_build_object('kind','none'); end if;
  return jsonb_build_object('kind',case when bd=0 then 'exact' else 'close' end,'i',best);
@@ -506,3 +511,32 @@ revoke all on function public.feud_submit(uuid,text),public.feud_buzz(uuid),publ
  public.feud_skip(uuid),public.feud_reveal_rest(uuid),public.feud_next_round(uuid,text,jsonb) from public,anon;
 grant execute on function public.feud_submit(uuid,text),public.feud_buzz(uuid),public.feud_set_mode(uuid,text),public.feud_auto_start(uuid),public.feud_confirm(uuid,boolean),
  public.feud_skip(uuid),public.feud_reveal_rest(uuid),public.feud_next_round(uuid,text,jsonb) to authenticated;
+
+
+-- =====================================================================
+-- TURN TIMER: the host screen counts each turn down (default 20 seconds). turn_secs = 0 turns it off.
+-- turn_seq changes every time a turn changes, so every screen knows when to restart its countdown.
+-- =====================================================================
+alter table public.feud_games
+  add column if not exists turn_seq int not null default 0,
+  add column if not exists turn_secs int not null default 20;
+
+create or replace function public.feud_turn_seq() returns trigger language plpgsql as $$
+begin
+ if NEW.turn_user is distinct from OLD.turn_user or NEW.phase is distinct from OLD.phase or NEW.status is distinct from OLD.status
+    or NEW.last_try is distinct from OLD.last_try or NEW.strikes is distinct from OLD.strikes or NEW.board is distinct from OLD.board then
+  NEW.turn_seq:=OLD.turn_seq+1;
+ end if;
+ return NEW;
+end$$;
+drop trigger if exists feud_turn_seq on public.feud_games;
+create trigger feud_turn_seq before update on public.feud_games for each row execute function public.feud_turn_seq();
+
+create or replace function public.feud_set_timer(p_game uuid, p_secs int) returns jsonb language plpgsql security definer set search_path=public as $$
+begin
+ if not public.is_host() or p_secs<0 or p_secs>90 then return jsonb_build_object('ok',false); end if;
+ update public.feud_games set turn_secs=p_secs where id=p_game;
+ return jsonb_build_object('ok',true);
+end$$;
+revoke all on function public.feud_set_timer(uuid,int) from public,anon;
+grant execute on function public.feud_set_timer(uuid,int) to authenticated;

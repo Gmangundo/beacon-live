@@ -58,3 +58,38 @@
 .judge{max-width:640px;margin:12px auto;padding:16px 18px;border-radius:20px;border:1.5px solid var(--accent2);background:rgba(255,200,87,.12);text-align:center}
 .judge .cc{justify-content:center}
 @container (max-width:640px){.sbox b{font-size:5.4cqw}.slot.on .t{font-size:3cqw}}
+
+/* ---------- buzz spotlight ---------- */
+.beam{position:absolute;top:-8%;width:36%;height:84%;z-index:2;pointer-events:none;clip-path:polygon(45% 0,55% 0,100% 100%,0 100%);mix-blend-mode:screen;
+ background:linear-gradient(180deg,rgba(255,255,255,.75),var(--bc) 62%,transparent);opacity:.7;transform-origin:50% 0;animation:beamin .45s ease-out,beamsway 3.2s ease-in-out .45s infinite alternate}
+.beam.red{--bc:rgba(255,107,107,.55);left:-5.5%}.beam.blue{--bc:rgba(90,169,255,.55);right:-5.5%}
+.wing.spot{animation:spotpulse .9s ease-in-out infinite alternate}
+.wing.spot.red{--sg:rgba(255,107,107,.9)}.wing.spot.blue{--sg:rgba(90,169,255,.9)}
+.arena.hasspot .panel,.arena.hasspot .oval,.arena.hasspot .logo{filter:brightness(.62);transition:filter .4s}
+@keyframes beamin{from{opacity:0;transform:scaleY(.2)}}
+@keyframes beamsway{from{transform:rotate(-2.5deg)}to{transform:rotate(2.5deg)}}
+@keyframes spotpulse{from{box-shadow:0 0 0 .6cqw #0a0f26,0 0 3cqw .4cqw var(--sg)}to{box-shadow:0 0 0 .6cqw #0a0f26,0 0 7cqw 1.4cqw var(--sg)}}
+@media (prefers-reduced-motion:reduce){.beam,.wing.spot{animation:none!important}}
+/* ---------- face-off intro ---------- */
+.vs{position:absolute;left:25%;right:25%;top:15%;bottom:25%;z-index:4;display:flex;align-items:center;justify-content:space-around;border-radius:1.6cqw;overflow:hidden;
+ background:radial-gradient(circle at 50% 50%,rgba(40,70,200,.55),rgba(5,8,24,.94) 70%);border:.5cqw solid #FF9F1C;animation:vsin .5s ease-out}
+.vs div{text-align:center;color:#fff;display:flex;flex-direction:column;align-items:center;gap:.5cqw}
+.vs b{font-size:2.6cqw;text-transform:uppercase;letter-spacing:.04em;max-width:15cqw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.vs small{font-size:1.3cqw;letter-spacing:.25em;opacity:.85}
+.vsl{animation:vsl .8s cubic-bezier(.2,.9,.2,1) both}.vsr{animation:vsr .8s cubic-bezier(.2,.9,.2,1) both}
+.vsl small{color:#ff9b9b}.vsr small{color:#9fd0ff}
+.vsx{font:700 7.5cqw/1 'Oswald',sans-serif;background:linear-gradient(180deg,#fff6c9,#ffc857 50%,#ff8a00);-webkit-background-clip:text;background-clip:text;color:transparent!important;filter:drop-shadow(0 .3cqw 0 #7a3b00);animation:vspop .5s .55s cubic-bezier(.3,1.6,.5,1) both}
+.vsnote{position:absolute;left:0;right:0;bottom:1.2cqw;text-align:center;font-size:1.6cqw;letter-spacing:.3em;color:#FFC857;animation:vsblink 1s ease-in-out infinite alternate}
+@keyframes vsin{from{opacity:0}}@keyframes vsl{from{transform:translateX(-30cqw);opacity:0}}@keyframes vsr{from{transform:translateX(30cqw);opacity:0}}
+@keyframes vspop{from{transform:scale(0) rotate(-20deg);opacity:0}}@keyframes vsblink{from{opacity:.45}}
+/* ---------- turn timer ---------- */
+.tbar{height:10px;border-radius:99px;background:rgba(255,255,255,.14);overflow:hidden;margin:10px auto 2px;max-width:380px}
+.tbar i{display:block;height:100%;width:100%;background:linear-gradient(90deg,#5FD6A0,#FFC857);transition:width .25s linear}
+.tbar.low i{background:linear-gradient(90deg,#ff4d4d,#ff9b4d)}.tbar.low{animation:tlow .5s ease-in-out infinite alternate}
+@keyframes tlow{to{box-shadow:0 0 14px rgba(255,77,77,.8)}}
+/* ---------- locked characters ---------- */
+.avpick button{position:relative}
+.avpick button.lock .pav{filter:grayscale(.85) brightness(.6)}
+.avpick .lk{position:absolute;bottom:3px;left:50%;transform:translateX(-50%);font-size:.64rem;font-weight:800;background:rgba(0,0,0,.75);color:#FFC857;padding:1px 7px;border-radius:99px;white-space:nowrap}
+.avpick button.lock::after{content:"\1F512";position:absolute;top:2px;right:5px;font-size:.8rem}
+.avnote{min-height:1.4em;text-align:center}

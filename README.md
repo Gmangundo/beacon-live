@@ -36,6 +36,18 @@
 
 Tip: write answers short and plain (for example `Genesis`, not `The Book of Genesis`), because players match against what you typed.
 
+
+## New in this version
+- **Buzz spotlight:** when a team buzzes in, a spotlight beam and glow land on that team's side of the host screen.
+- **Face-off intro:** in phone-answers mode, the two face-off players' characters slide in with a big VS while the buzzers are open.
+- **Turn timer:** the host screen counts each turn down (default 20 seconds). Click the **Timer** button on the host screen to switch between OFF, 15, 20 and 30 seconds. When time runs out the turn counts as a miss. The host screen must stay open, because it is the timekeeper.
+- **Answer aliases:** on the host setup screen, put other wordings after a `|`, for example `Psalms | Psalm | Book of Psalms, 24`. Players can type any of them. The board shows the first wording.
+- **Unlockable characters:** players start with 8 characters. More unlock as they level up (Level 2 to Level 10) from the XP they earn in quiz games.
+- **Level-up and badge moment:** a celebration screen appears after a quiz game when a player levels up or earns a badge. It shows any characters just unlocked.
+- **Winner screen:** a rotating light sweep and spotlight beams behind the podium.
+- **Glass cards:** a soft light follows the pointer across the cards (laptops and desktops only).
+- Run `sql/01_beacon_setup.sql` again in Supabase after uploading, because the timer and answer aliases need it.
+
 ## Spline 3D background
 Open `spline.js` and paste your Spline link after `all:`. Share links (`my.spline.design/...`) and exported `.splinecode` files both work.
 
